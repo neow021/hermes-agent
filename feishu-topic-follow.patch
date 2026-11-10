@@ -1,4 +1,4 @@
-From edf999d957eaeafdbe35503348a046cba01a47bc Mon Sep 17 00:00:00 2001
+From 7b19442b62b5ccd8eebc7e13da57b01cb0c418d1 Mon Sep 17 00:00:00 2001
 From: Neo <65333514+neow021@users.noreply.github.com>
 Date: Mon, 9 Nov 2026 05:49:04 +0000
 Subject: [PATCH] feat(feishu): open a topic for group replies and follow it
@@ -45,10 +45,10 @@ _fetch_last_message_in_thread moves there with it to keep the facade shrinking.
  create mode 100644 tests/gateway/test_feishu_topic_follow.py
 
 diff --git a/locales/af.yaml b/locales/af.yaml
-index c742e29027..cfbf311677 100644
+index c90d988494..2580576db7 100644
 --- a/locales/af.yaml
 +++ b/locales/af.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Slegs 'n gemagtigde Matrix-gebruiker kan hierdie kontroles gebruik."
        not_requester: "Slegs die gebruiker wat hierdie aksie aangevra het, kan hierdie kontroles gebruik."
    feishu:
@@ -58,10 +58,10 @@ index c742e29027..cfbf311677 100644
        title: "Hermes het jou insette nodig"
        other: "✏️ Ander (tik antwoord)"
 diff --git a/locales/ar.yaml b/locales/ar.yaml
-index feaaa5e0d4..b11a9f552e 100644
+index 80958dd20e..59aa7776bd 100644
 --- a/locales/ar.yaml
 +++ b/locales/ar.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "لا يمكن استخدام عناصر التحكم هذه إلا لمستخدم Matrix مصرّح له."
        not_requester: "لا يمكن استخدام عناصر التحكم هذه إلا للمستخدم الذي طلب هذا الإجراء."
    feishu:
@@ -71,10 +71,10 @@ index feaaa5e0d4..b11a9f552e 100644
        title: "Hermes يحتاج إلى ردّك"
        other: "✏️ غير ذلك (اكتب الإجابة)"
 diff --git a/locales/de.yaml b/locales/de.yaml
-index 017a5cc78b..224476b932 100644
+index c0654952de..7b9829b2bb 100644
 --- a/locales/de.yaml
 +++ b/locales/de.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Nur ein autorisierter Matrix-Benutzer kann diese Steuerelemente verwenden."
        not_requester: "Nur der Benutzer, der diese Aktion angefordert hat, kann diese Steuerelemente verwenden."
    feishu:
@@ -84,10 +84,10 @@ index 017a5cc78b..224476b932 100644
        title: "Hermes benötigt Ihre Eingabe"
        other: "✏️ Eigene Antwort"
 diff --git a/locales/en.yaml b/locales/en.yaml
-index f298bcdcd1..d42e768fea 100644
+index 8170887068..61a716894a 100644
 --- a/locales/en.yaml
 +++ b/locales/en.yaml
-@@ -1428,6 +1428,8 @@ platform:
+@@ -1431,6 +1431,8 @@ platform:
        not_requester: "Only the user who requested this action can use these controls."
  
    feishu:
@@ -97,10 +97,10 @@ index f298bcdcd1..d42e768fea 100644
        title: "Hermes needs your input"
        other: "✏️ Other (type answer)"
 diff --git a/locales/es.yaml b/locales/es.yaml
-index 03f3c2d36a..fbf6e03cb8 100644
+index 4b00392718..2054ebe840 100644
 --- a/locales/es.yaml
 +++ b/locales/es.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Solo un usuario autorizado de Matrix puede usar estos controles."
        not_requester: "Solo el usuario que solicitó esta acción puede usar estos controles."
    feishu:
@@ -110,10 +110,10 @@ index 03f3c2d36a..fbf6e03cb8 100644
        title: "Hermes necesita tu respuesta"
        other: "✏️ Otra (escribir respuesta)"
 diff --git a/locales/fr.yaml b/locales/fr.yaml
-index 802a03edfa..7188be194f 100644
+index 470642dc16..661be7638f 100644
 --- a/locales/fr.yaml
 +++ b/locales/fr.yaml
-@@ -1589,6 +1589,8 @@ platform:
+@@ -1592,6 +1592,8 @@ platform:
        unauthorized: "Seul un utilisateur Matrix autorisé peut utiliser ces contrôles."
        not_requester: "Seul l'utilisateur à l'origine de cette action peut utiliser ces contrôles."
    feishu:
@@ -123,10 +123,10 @@ index 802a03edfa..7188be194f 100644
        title: "Hermes a besoin de votre réponse"
        other: "✏️ Autre (saisir)"
 diff --git a/locales/ga.yaml b/locales/ga.yaml
-index 9645fe49ea..23810b4aa5 100644
+index 5e3e74086e..f337f184ba 100644
 --- a/locales/ga.yaml
 +++ b/locales/ga.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Ní féidir ach le húsáideoir Matrix údaraithe na rialtáin seo a úsáid."
        not_requester: "Ní féidir ach leis an úsáideoir a d'iarr an gníomh seo na rialtáin seo a úsáid."
    feishu:
@@ -136,10 +136,10 @@ index 9645fe49ea..23810b4aa5 100644
        title: "Tá d'ionchur de dhíth ar Hermes"
        other: "✏️ Eile (clóscríobh freagra)"
 diff --git a/locales/hu.yaml b/locales/hu.yaml
-index f5772b3d6c..85aa4fa97d 100644
+index 994c7a853e..23fcf1046d 100644
 --- a/locales/hu.yaml
 +++ b/locales/hu.yaml
-@@ -1385,6 +1385,8 @@ platform:
+@@ -1388,6 +1388,8 @@ platform:
        unauthorized: "Ezeket a vezérlőket csak jogosult Matrix-felhasználó használhatja."
        not_requester: "Ezeket a vezérlőket csak az a felhasználó használhatja, aki a műveletet kérte."
    feishu:
@@ -149,10 +149,10 @@ index f5772b3d6c..85aa4fa97d 100644
        title: "A Hermes a válaszodra vár"
        other: "✏️ Egyéb (írd be a választ)"
 diff --git a/locales/it.yaml b/locales/it.yaml
-index 7f327521f4..e51c6b643d 100644
+index 60013cd10d..6dfe471f2f 100644
 --- a/locales/it.yaml
 +++ b/locales/it.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Solo un utente Matrix autorizzato può usare questi controlli."
        not_requester: "Solo l'utente che ha richiesto questa azione può usare questi controlli."
    feishu:
@@ -162,10 +162,10 @@ index 7f327521f4..e51c6b643d 100644
        title: "Hermes ha bisogno del tuo contributo"
        other: "✏️ Altro (digita)"
 diff --git a/locales/ja.yaml b/locales/ja.yaml
-index 5ddb53005f..04072c0665 100644
+index fa149f6010..2f7c85711b 100644
 --- a/locales/ja.yaml
 +++ b/locales/ja.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "これらの操作は、認可された Matrix ユーザーのみが使用できます。"
        not_requester: "これらの操作は、このアクションをリクエストしたユーザーのみが使用できます。"
    feishu:
@@ -175,10 +175,10 @@ index 5ddb53005f..04072c0665 100644
        title: "Hermes が入力を求めています"
        other: "✏️ その他（回答を入力）"
 diff --git a/locales/ko.yaml b/locales/ko.yaml
-index bb541cfe4e..69e0c2f951 100644
+index c303139969..df46ec3a89 100644
 --- a/locales/ko.yaml
 +++ b/locales/ko.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "권한이 있는 Matrix 사용자만 이 컨트롤을 사용할 수 있어요."
        not_requester: "이 작업을 요청한 사용자만 이 컨트롤을 사용할 수 있어요."
    feishu:
@@ -188,10 +188,10 @@ index bb541cfe4e..69e0c2f951 100644
        title: "Hermes가 입력을 기다리고 있어요"
        other: "✏️ 기타 (직접 입력)"
 diff --git a/locales/pt.yaml b/locales/pt.yaml
-index 57ce5485fa..8eeaa66770 100644
+index 2cf555c093..4310991c84 100644
 --- a/locales/pt.yaml
 +++ b/locales/pt.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Somente um usuário autorizado do Matrix pode usar estes controles."
        not_requester: "Somente o usuário que solicitou esta ação pode usar estes controles."
    feishu:
@@ -201,10 +201,10 @@ index 57ce5485fa..8eeaa66770 100644
        title: "O Hermes precisa da sua resposta"
        other: "✏️ Outro (digitar resposta)"
 diff --git a/locales/ru.yaml b/locales/ru.yaml
-index 0e9a62f6c8..d7bfbbb1d7 100644
+index 25022b56dc..1c88101135 100644
 --- a/locales/ru.yaml
 +++ b/locales/ru.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Этими элементами управления может пользоваться только авторизованный пользователь Matrix."
        not_requester: "Этими элементами управления может пользоваться только тот, кто запросил это действие."
    feishu:
@@ -214,10 +214,10 @@ index 0e9a62f6c8..d7bfbbb1d7 100644
        title: "Hermes нужен ваш ответ"
        other: "✏️ Другое (ввести ответ)"
 diff --git a/locales/tr.yaml b/locales/tr.yaml
-index e9085616e5..dee39979fb 100644
+index fc00610f03..304d45ced9 100644
 --- a/locales/tr.yaml
 +++ b/locales/tr.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Bu kontrolleri yalnızca yetkili bir Matrix kullanıcısı kullanabilir."
        not_requester: "Bu kontrolleri yalnızca bu işlemi isteyen kullanıcı kullanabilir."
    feishu:
@@ -227,10 +227,10 @@ index e9085616e5..dee39979fb 100644
        title: "Hermes girdinize ihtiyaç duyuyor"
        other: "✏️ Diğer (yanıt yazın)"
 diff --git a/locales/uk.yaml b/locales/uk.yaml
-index 5a5a6b9384..4f1035a368 100644
+index f79eaaaf93..979ad9459a 100644
 --- a/locales/uk.yaml
 +++ b/locales/uk.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "Ці елементи керування доступні лише авторизованому користувачу Matrix."
        not_requester: "Ці елементи керування доступні лише користувачу, який запросив цю дію."
    feishu:
@@ -240,10 +240,10 @@ index 5a5a6b9384..4f1035a368 100644
        title: "Hermes потребує вашої відповіді"
        other: "✏️ Інше (ввести відповідь)"
 diff --git a/locales/zh-hant.yaml b/locales/zh-hant.yaml
-index abf2e1df34..29fa92af08 100644
+index 7ee2ec5d5c..e69581447b 100644
 --- a/locales/zh-hant.yaml
 +++ b/locales/zh-hant.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "只有已授權的 Matrix 使用者可以使用這些控制項。"
        not_requester: "只有提出此操作的使用者可以使用這些控制項。"
    feishu:
@@ -253,10 +253,10 @@ index abf2e1df34..29fa92af08 100644
        title: "Hermes 需要你的輸入"
        other: "✏️ 其他（輸入答案）"
 diff --git a/locales/zh.yaml b/locales/zh.yaml
-index 7a8d84a8db..20cee5088d 100644
+index 4cd199efc4..65b2c6d4a7 100644
 --- a/locales/zh.yaml
 +++ b/locales/zh.yaml
-@@ -1368,6 +1368,8 @@ platform:
+@@ -1371,6 +1371,8 @@ platform:
        unauthorized: "只有已授权的 Matrix 用户才能使用这些控件。"
        not_requester: "只有发起此操作的用户才能使用这些控件。"
    feishu:
@@ -266,18 +266,18 @@ index 7a8d84a8db..20cee5088d 100644
        title: "Hermes 需要你的输入"
        other: "✏️ 其他（输入回答）"
 diff --git a/plugins/platforms/feishu/adapter.py b/plugins/platforms/feishu/adapter.py
-index aa80d3e0bf..78519524ce 100644
+index b41b13c803..c1324aa8c7 100644
 --- a/plugins/platforms/feishu/adapter.py
 +++ b/plugins/platforms/feishu/adapter.py
-@@ -93,6 +93,7 @@ from gateway.platforms.base import (
- )
+@@ -94,6 +94,7 @@ from gateway.platforms.base import (
  from gateway.platforms.event import MessageEvent, MessageType, ProcessingOutcome
+ from gateway.platforms.helpers import send_chunks
  from plugins.platforms.feishu.adapter_choice_cards import FeishuChoiceCardsMixin
 +from plugins.platforms.feishu.feishu_topic_follow import FeishuTopicFollowMixin
  from gateway.status import acquire_scoped_lock
  from gateway.status_scoped_locks import release_scoped_lock
  from hermes_constants import get_hermes_home
-@@ -1285,7 +1286,7 @@ def _sdk_build(request_cls: Any, **fields: Any) -> Any:
+@@ -1286,7 +1287,7 @@ def _sdk_build(request_cls: Any, **fields: Any) -> Any:
      return builder.build()
  
  
@@ -286,7 +286,7 @@ index aa80d3e0bf..78519524ce 100644
      """Feishu/Lark bot adapter."""
      # Answers /p/<profile>/... on the default listener for a served secondary (shared_ingress).
      serves_profile_prefix: bool = True
-@@ -1346,6 +1347,7 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+@@ -1347,6 +1348,7 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
          self._update_prompt_state: dict[int, dict[str, str]] = {}
          self._update_prompt_counter = itertools.count(1)
          self._init_choice_card_state()
@@ -303,7 +303,7 @@ index aa80d3e0bf..78519524ce 100644
          if reason is not None:
              logger.debug("[Feishu] dropping inbound event: %s", reason)
              if reason == "group_policy_rejected":
-@@ -2677,6 +2681,8 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+@@ -2678,6 +2682,8 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
              or getattr(sender_id, "union_id", None) or "<unknown>"
          )
          chat_id = getattr(message, "chat_id", "") or ""
@@ -312,7 +312,7 @@ index aa80d3e0bf..78519524ce 100644
          logger.info(
              "[Feishu] Inbound %s message received: id=%s type=%s chat_id=%s sender=%s:%s text=%r media=%d",
              "dm" if chat_type == "p2p" else "group", message_id, inbound_type.value, chat_id,
-@@ -3762,22 +3768,6 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+@@ -3765,22 +3771,6 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
              chat_id=chat_id, msg_type=msg_type, payload=payload, reply_to=reply_to, metadata=metadata,
          )
  
