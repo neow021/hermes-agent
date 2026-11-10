@@ -8,6 +8,14 @@
 |---|---|---|---|
 | 飞书话题：@ 后自动开话题回复（`thread_reply`）；话题内不用再 @（`thread_follow`） | `feat/feishu-topic-follow` | NousResearch/hermes-agent#151706 | 未合并，本机已在用 |
 
+## 在别的机器上安装
+
+让那台机器上的 agent 阅读并照做（会先把权限申请链接发给你）：
+
+`https://raw.githubusercontent.com/neow021/hermes-agent/neo/notes/INSTALL-feishu-topic-follow.md`
+
+补丁文件也放在本分支：`feishu-topic-follow.patch`。
+
 ## 本机的位置
 
 | 用途 | 路径 |
@@ -64,6 +72,9 @@ HERMES_PYTHON=~/.hermes/hermes-agent/venv/bin/python scripts/run_tests.sh tests/
 ~/.hermes/hermes-agent/venv/bin/python scripts/check --commit HEAD
 git push -f origin feat/feishu-topic-follow          # PR #151706 会自动更新
 git format-patch -1 HEAD --stdout > ~/dev/hermes-patches/feishu-topic-follow.patch
+# 同步到 neo/notes，别的机器按 INSTALL 文件下载的是这一份
+cp ~/dev/hermes-patches/feishu-topic-follow.patch ~/dev/hermes-agent-notes/
+git -C ~/dev/hermes-agent-notes commit -am "chore: refresh feishu-topic-follow patch" && git -C ~/dev/hermes-agent-notes push
 ```
 
 上游的代码检查有一条规则：`adapter.py` 只能变小、不能变大。新逻辑放进 `feishu_topic_follow.py`。
