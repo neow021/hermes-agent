@@ -10,11 +10,11 @@
 
 ## 在别的机器上安装
 
-让那台机器上的 agent 阅读并照做（会先把权限申请链接发给你）：
+安装步骤是私有 repo `neow021/.agents` 里的 skill `hermes-feishu-setup`（会先把权限申请链接发给你）。让那台机器上的 agent（需已登录 `gh`）读取并照做：
 
-`https://raw.githubusercontent.com/neow021/hermes-agent/neo/notes/INSTALL-feishu-topic-follow.md`
+`gh api repos/neow021/.agents/contents/skills/hermes-feishu-setup/SKILL.md -H "Accept: application/vnd.github.raw"`
 
-补丁文件也放在本分支：`feishu-topic-follow.patch`。
+补丁文件放在本分支：`feishu-topic-follow.patch`，skill 从这里下载。改安装步骤时改那个 skill，不改这里。
 
 ## 本机的位置
 
