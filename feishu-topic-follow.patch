@@ -1,4 +1,4 @@
-From 7b19442b62b5ccd8eebc7e13da57b01cb0c418d1 Mon Sep 17 00:00:00 2001
+From cd865fd731540ea621030223d32740efd1234428 Mon Sep 17 00:00:00 2001
 From: Neo <65333514+neow021@users.noreply.github.com>
 Date: Mon, 9 Nov 2026 05:49:04 +0000
 Subject: [PATCH] feat(feishu): open a topic for group replies and follow it
@@ -10,13 +10,18 @@ group_rules entry:
 - thread_reply: a top-level group message that triggers the bot is answered in a
   new topic. A short in-thread acknowledgement opens the topic before the turn
   runs, so the first turn already belongs to the topic's session.
-- thread_follow: inside a topic this bot owns, follow-ups need no @mention. A
-  message that @mentions someone else is left to them; the group policy still
-  applies.
+- thread_follow: inside a topic, follow-ups need no @mention. A message that
+  @mentions someone else is left to them; the group policy still applies.
+  Two modes decide which bot answers:
+  - last_active (what true means): the newest topic message that was written
+    by a bot or @mentions one. A bot @mentioned mid-topic takes over at once,
+    even before its reply lands; a bot message @mentioning another bot hands
+    the topic to it. Read from the newest 20 messages, never cached.
+  - owner: the first bot to reply keeps the topic (cached once settled).
 
-Ownership is the first bot-authored message in the topic, read from Feishu and
-cached, so it survives restarts and a bot @mentioned once in another bot's topic
-does not take it over. The behaviour lives in a new feishu_topic_follow sibling;
+Both are read from the topic itself, so they survive restarts, and every bot
+in the chat reaches the same answer from the same history without
+coordinating. The behaviour lives in a new feishu_topic_follow sibling;
 _fetch_last_message_in_thread moves there with it to keep the facade shrinking.
 ---
  locales/af.yaml                               |   2 +
@@ -37,10 +42,10 @@ _fetch_last_message_in_thread moves there with it to keep the facade shrinking.
  locales/zh-hant.yaml                          |   2 +
  locales/zh.yaml                               |   2 +
  plugins/platforms/feishu/adapter.py           |  24 +-
- .../platforms/feishu/feishu_topic_follow.py   | 155 ++++++++++++
- tests/gateway/test_feishu_topic_follow.py     | 235 ++++++++++++++++++
- website/docs/user-guide/messaging/feishu.md   |  20 ++
- 21 files changed, 451 insertions(+), 17 deletions(-)
+ .../platforms/feishu/feishu_topic_follow.py   | 228 +++++++++++++
+ tests/gateway/test_feishu_topic_follow.py     | 317 ++++++++++++++++++
+ website/docs/user-guide/messaging/feishu.md   |  24 ++
+ 21 files changed, 610 insertions(+), 17 deletions(-)
  create mode 100644 plugins/platforms/feishu/feishu_topic_follow.py
  create mode 100644 tests/gateway/test_feishu_topic_follow.py
 
@@ -337,10 +342,10 @@ index b41b13c803..c1324aa8c7 100644
      ) -> Any:
 diff --git a/plugins/platforms/feishu/feishu_topic_follow.py b/plugins/platforms/feishu/feishu_topic_follow.py
 new file mode 100644
-index 0000000000..34458d4d1a
+index 0000000000..8a35c5bdb6
 --- /dev/null
 +++ b/plugins/platforms/feishu/feishu_topic_follow.py
-@@ -0,0 +1,155 @@
+@@ -0,0 +1,228 @@
 +"""Feishu topic follow: answer a group @mention inside a new topic, then keep answering in it.
 +
 +Mixed into ``FeishuAdapter``. Two opt-in switches under ``platforms.feishu.extra`` (each
@@ -349,12 +354,18 @@ index 0000000000..34458d4d1a
 +- ``thread_reply``: a top-level group message that triggers the bot gets its reply in a new
 +  topic. A short in-thread acknowledgement opens the topic before the turn runs, so the first
 +  turn already belongs to the topic's session instead of the group's.
-+- ``thread_follow``: inside a topic this bot owns, follow-ups need no @mention. A message that
-+  @mentions someone else (a colleague, another bot) is left to them.
++- ``thread_follow``: inside a topic, follow-ups need no @mention. A message that @mentions
++  someone else (a colleague, another bot) is left to them. Who answers depends on the mode:
 +
-+Ownership is read from the topic itself — the first bot-authored message in it — so it survives
-+gateway restarts without a state file, and a bot @mentioned once in another bot's topic answers
-+that message without taking the topic over.
++  - ``last_active`` (``true`` means this): the bot triggered last in the topic — the newest
++    message either written by a bot or @mentioning one decides. A bot @mentioned mid-topic takes
++    the topic over at once, even before it has replied, and a bot message @mentioning another bot
++    hands the topic to it.
++  - ``owner``: the bot that replied in the topic first keeps it; a bot @mentioned once in another
++    bot's topic answers that message only.
++
++Either way the decision is read from the topic itself, so it survives gateway restarts without a
++state file, and every bot in the chat reaches the same answer from the same history.
 +"""
 +
 +from __future__ import annotations
@@ -372,6 +383,16 @@ index 0000000000..34458d4d1a
 +# is treated as unowned.
 +_OWNER_SCAN_PAGE_SIZE = 50
 +_OWNER_CACHE_MAX = 4096
++# Newest messages scanned for the last trigger; older un-@ chatter than this leaves the topic idle.
++_LAST_ACTIVE_SCAN_PAGE_SIZE = 20
++
++FOLLOW_LAST_ACTIVE = "last_active"
++FOLLOW_OWNER = "owner"
++_FOLLOW_MODES = {FOLLOW_LAST_ACTIVE, FOLLOW_OWNER}
++
++
++def _is_mention_all(mention: Any) -> bool:
++    return getattr(mention, "key", None) == "@_all" or getattr(mention, "id", None) == "all"
 +
 +
 +class FeishuTopicFollowMixin:
@@ -391,6 +412,17 @@ index 0000000000..34458d4d1a
 +        if isinstance(rule, dict) and key in rule:
 +            return _to_boolean(rule[key])
 +        return _to_boolean(extra.get(key, False))
++
++    def _topic_follow_mode(self, chat_id: str) -> Optional[str]:
++        """``last_active`` / ``owner`` when ``thread_follow`` is on for the chat, else ``None``."""
++        extra = getattr(getattr(self, "config", None), "extra", None) or {}
++        rules = extra.get("group_rules")
++        rule = rules.get(chat_id) if isinstance(rules, dict) and chat_id else None
++        value = rule["thread_follow"] if isinstance(rule, dict) and "thread_follow" in rule else extra.get("thread_follow")
++        mode = str(value).strip().lower() if isinstance(value, str) else None
++        if mode in _FOLLOW_MODES:
++            return mode
++        return FOLLOW_LAST_ACTIVE if self._topic_option(chat_id, "thread_follow") else None
 +
 +    def _remember_topic_owner(self, thread_id: str, owned: bool) -> None:
 +        cache = self._topic_owner_cache
@@ -431,8 +463,8 @@ index 0000000000..34458d4d1a
 +
 +        chat_id = getattr(message, "chat_id", "") or ""
 +        thread_id = getattr(message, "thread_id", None)
-+        if (not thread_id or getattr(message, "chat_type", "p2p") == "p2p" or _is_bot_sender(sender)
-+                or not self._topic_option(chat_id, "thread_follow")):
++        mode = self._topic_follow_mode(chat_id)
++        if not thread_id or getattr(message, "chat_type", "p2p") == "p2p" or _is_bot_sender(sender) or not mode:
 +            return False
 +        # The mention gate and the group policy share one reject reason: re-check the policy.
 +        if not self._allow_group_message(getattr(sender, "sender_id", None), chat_id):
@@ -440,7 +472,49 @@ index 0000000000..34458d4d1a
 +        # Any @mention left here is of someone else: an @ of this bot (or @all) was admitted.
 +        if getattr(message, "mentions", None):
 +            return False
-+        return await self._topic_owned_by_self(thread_id)
++        if mode == FOLLOW_OWNER:
++            return await self._topic_owned_by_self(thread_id)
++        return await self._topic_last_triggered_self(thread_id, getattr(message, "message_id", "") or "")
++
++    async def _topic_last_triggered_self(self, thread_id: str, current_message_id: str) -> bool:
++        """Whether this bot is the one triggered last in the topic (newest message first).
++
++        Never cached: every bot @mention or reply can move the topic to another bot.
++        """
++        items = await self._list_topic_messages(thread_id, "ByCreateTimeDesc", _LAST_ACTIVE_SCAN_PAGE_SIZE)
++        for item in items or []:
++            if getattr(item, "message_id", None) == current_message_id:
++                continue
++            decided = self._trigger_decision(item)
++            if decided is not None:
++                return decided
++        return False
++
++    def _trigger_decision(self, item: Any) -> Optional[bool]:
++        """True/False when ``item`` settles who was triggered last; ``None`` to look further back.
++
++        - @mentions this bot (from a person or a peer bot handing over) -> this bot.
++        - written by a bot -> that bot, unless it @mentions others (a handover to them).
++        - a person @mentioning others -> them; this bot cannot tell a colleague from a bot,
++          so the topic goes quiet until a bot answers or is @mentioned again.
++        - a person without @mentions (or with only @all) -> look further back.
++        """
++        mentions = [m for m in getattr(item, "mentions", None) or [] if not _is_mention_all(m)]
++        if any(self._history_mention_is_self(m) for m in mentions):
++            return True
++        sender = getattr(item, "sender", None)
++        if getattr(sender, "sender_type", "") == "app":
++            # GET/list report sender.id = app_id for bot messages.
++            return not mentions and str(getattr(sender, "id", "") or "") == self._app_id
++        return False if mentions else None
++
++    def _history_mention_is_self(self, mention: Any) -> bool:
++        # list/GET mentions carry ``id`` as a plain app-scoped open_id string; events nest it.
++        mention_id = getattr(mention, "id", None)
++        open_id = mention_id if isinstance(mention_id, str) else getattr(mention_id, "open_id", None)
++        return self._bot_identity().matches(
++            open_id=(open_id or "").strip(), user_id="", name=(getattr(mention, "name", None) or "").strip(),
++        )
 +
 +    async def _topic_owned_by_self(self, thread_id: str) -> bool:
 +        cached = self._topic_owner_cache.get(thread_id)
@@ -455,13 +529,22 @@ index 0000000000..34458d4d1a
 +
 +    async def _first_bot_sender_in_topic(self, thread_id: str) -> Optional[str]:
 +        """App id of the first bot-authored message in a topic; ``None`` if none or unreadable."""
++        for item in await self._list_topic_messages(thread_id, "ByCreateTimeAsc", _OWNER_SCAN_PAGE_SIZE) or []:
++            sender = getattr(item, "sender", None)
++            # GET/list report sender.id = app_id for bot messages; peer bots differ only there.
++            if getattr(sender, "sender_type", "") == "app":
++                return str(getattr(sender, "id", "") or "")
++        return None
++
++    async def _list_topic_messages(self, thread_id: str, sort_type: str, page_size: int) -> Optional[list]:
++        """One page of a topic's messages; ``None`` if it cannot be read."""
 +        if not self._client:
 +            return None
 +        from lark_oapi.api.im.v1 import ListMessageRequest
 +
 +        request = (
 +            ListMessageRequest.builder().container_id_type("thread").container_id(thread_id)
-+            .sort_type("ByCreateTimeAsc").page_size(_OWNER_SCAN_PAGE_SIZE).build()
++            .sort_type(sort_type).page_size(page_size).build()
 +        )
 +        try:
 +            response = await self._run_blocking(self._client.im.v1.message.list, request)
@@ -474,12 +557,7 @@ index 0000000000..34458d4d1a
 +                getattr(response, "code", "?"), getattr(response, "msg", ""),
 +            )
 +            return None
-+        for item in getattr(getattr(response, "data", None), "items", None) or []:
-+            sender = getattr(item, "sender", None)
-+            # GET/list report sender.id = app_id for bot messages; peer bots differ only there.
-+            if getattr(sender, "sender_type", "") == "app":
-+                return str(getattr(sender, "id", "") or "")
-+        return None
++        return list(getattr(getattr(response, "data", None), "items", None) or [])
 +
 +    async def _fetch_last_message_in_thread(self, thread_id: str) -> Optional[str]:
 +        """Fetch the last message_id in a thread for reply-based routing."""
@@ -498,19 +576,20 @@ index 0000000000..34458d4d1a
 +        return None
 diff --git a/tests/gateway/test_feishu_topic_follow.py b/tests/gateway/test_feishu_topic_follow.py
 new file mode 100644
-index 0000000000..b8d8f9701a
+index 0000000000..6221b3d361
 --- /dev/null
 +++ b/tests/gateway/test_feishu_topic_follow.py
-@@ -0,0 +1,235 @@
+@@ -0,0 +1,317 @@
 +"""Feishu topic follow: a group @mention is answered in a new topic, and inside a topic the bot
 +owns, follow-ups need no @mention.
 +
 +Behaviour contracts:
 +- ``thread_reply`` opens the topic before the turn runs, so the first turn's source already
 +  carries the topic's ``thread_id`` (one session for the whole topic).
-+- ``thread_follow`` admits an un-mentioned topic message only when the first bot reply in that
-+  topic is this bot's; a message @mentioning someone else, a sender the group policy rejects, and
-+  a bot sender stay rejected.
++- ``thread_follow`` admits an un-mentioned topic message only when this bot is the one the topic
++  belongs to: in ``last_active`` mode (the default, ``true``) the bot triggered last, in ``owner``
++  mode the bot that replied first. A message @mentioning someone else, a sender the group policy
++  rejects, and a bot sender stay rejected.
 +"""
 +
 +from __future__ import annotations
@@ -532,12 +611,13 @@ index 0000000000..b8d8f9701a
 +class _FakeMessageApi:
 +    """Stands in for ``client.im.v1.message``: records reply/list requests."""
 +
-+    def __init__(self, *, thread_id="omt_new", reply_ok=True, topic_senders=()):
++    def __init__(self, *, thread_id="omt_new", reply_ok=True, topic_senders=(), topic_messages=None):
 +        self.replies = []
 +        self.lists = []
 +        self._thread_id = thread_id
 +        self._reply_ok = reply_ok
 +        self._topic_senders = list(topic_senders)
++        self._topic_messages = topic_messages
 +
 +    def reply(self, request):
 +        self.replies.append(request)
@@ -547,6 +627,11 @@ index 0000000000..b8d8f9701a
 +
 +    def list(self, request):
 +        self.lists.append(request)
++        if self._topic_messages is not None:
++            items = list(self._topic_messages)
++            if request.sort_type == "ByCreateTimeDesc":
++                items.reverse()
++            return SimpleNamespace(success=lambda: True, data=SimpleNamespace(items=items))
 +        items = [SimpleNamespace(message_id=f"om_{i}", sender=SimpleNamespace(sender_type=kind, id=sid))
 +                 for i, (kind, sid) in enumerate(self._topic_senders)]
 +        return SimpleNamespace(success=lambda: True, data=SimpleNamespace(items=items))
@@ -675,19 +760,22 @@ index 0000000000..b8d8f9701a
 +    return adapter._process_inbound_message.await_count == 1
 +
 +
-+def test_unmentioned_message_in_own_topic_is_admitted_and_ownership_is_cached():
++_OWNER = {"thread_follow": "owner"}
++
++
++def test_owner_mode_admits_unmentioned_message_in_own_topic_and_caches_ownership():
 +    api = _FakeMessageApi(topic_senders=[("user", "ou_neo"), ("app", APP_ID)])
-+    adapter = _follow_adapter(api)
++    adapter = _follow_adapter(api, extra=_OWNER)
 +
 +    assert _deliver(adapter) is True
 +    assert _deliver(adapter) is True
 +    assert len(api.lists) == 1
 +
 +
-+def test_topic_owned_by_another_bot_stays_with_it_after_this_bot_was_mentioned_once():
++def test_owner_mode_topic_stays_with_its_first_bot_after_this_bot_was_mentioned_once():
 +    # Y answered first; X was @mentioned later and replied once. The topic is still Y's.
 +    api = _FakeMessageApi(topic_senders=[("user", "ou_neo"), ("app", PEER_APP_ID), ("app", APP_ID)])
-+    adapter = _follow_adapter(api)
++    adapter = _follow_adapter(api, extra=_OWNER)
 +
 +    assert _deliver(adapter) is False
 +
@@ -701,9 +789,9 @@ index 0000000000..b8d8f9701a
 +    assert api.lists == []
 +
 +
-+def test_topic_no_bot_has_answered_yet_is_not_followed_and_is_asked_again():
++def test_owner_mode_topic_no_bot_has_answered_yet_is_not_followed_and_is_asked_again():
 +    api = _FakeMessageApi(topic_senders=[("user", "ou_neo")])
-+    adapter = _follow_adapter(api)
++    adapter = _follow_adapter(api, extra=_OWNER)
 +
 +    assert _deliver(adapter) is False
 +    assert _deliver(adapter) is False
@@ -713,6 +801,7 @@ index 0000000000..b8d8f9701a
 +@pytest.mark.parametrize("extra", [
 +    {},
 +    {"thread_follow": True, "group_rules": {"oc_team": {"policy": "open", "thread_follow": False}}},
++    {"thread_follow": "nonsense"},
 +])
 +def test_follow_off_for_the_chat_keeps_the_mention_requirement(extra):
 +    api = _FakeMessageApi(topic_senders=[("app", APP_ID)])
@@ -737,11 +826,82 @@ index 0000000000..b8d8f9701a
 +
 +    assert _deliver(adapter, sender=make_sender(sender_type="bot", open_id="ou_peer")) is False
 +    assert _deliver(adapter, thread_id=None) is False
++
++
++# --- last_active mode: the bot triggered last answers -------------------------------------------
++
++
++def _msg(sender_type, sender_id, *mentioned, message_id=None):
++    mentions = [SimpleNamespace(key=f"@_user_{i}", id=oid, id_type="open_id", name=oid)
++                for i, oid in enumerate(mentioned, 1)] or None
++    return SimpleNamespace(message_id=message_id or f"om_h_{next(_n)}", mentions=mentions,
++                           sender=SimpleNamespace(sender_type=sender_type, id=sender_id))
++
++
++def _last_active_adapter(*history, extra=None):
++    """History oldest first; this bot is APP_ID / ou_me, the peer bot is PEER_APP_ID / ou_peer."""
++    api = _FakeMessageApi(topic_messages=list(history))
++    adapter = _follow_adapter(api, extra=extra)
++    adapter._bot_open_id, adapter._bot_user_id, adapter._bot_name = "ou_me", "", "Hermes"
++    return adapter, api
++
++
++@pytest.mark.parametrize("extra", [None, {"thread_follow": "last_active"}, {"thread_follow": "LAST_ACTIVE"}])
++def test_last_active_follows_the_bot_that_replied_last(extra):
++    me, _ = _last_active_adapter(_msg("user", "ou_neo", "ou_me"), _msg("app", APP_ID), _msg("user", "ou_neo"),
++                                 extra=extra)
++    assert _deliver(me) is True
++
++
++def test_last_active_moves_to_a_bot_mentioned_mid_topic_after_it_replied():
++    # This bot opened the topic; the peer was @mentioned and replied, so the topic is now the peer's.
++    me, api = _last_active_adapter(
++        _msg("user", "ou_neo", "ou_me"), _msg("app", APP_ID), _msg("user", "ou_neo", "ou_peer"), _msg("app", PEER_APP_ID),
++    )
++    assert _deliver(me) is False
++    # Re-read every time: nothing is cached in this mode.
++    assert _deliver(me) is False
++    assert len(api.lists) == 2
++
++
++def test_last_active_mentioned_bot_takes_over_before_it_has_replied():
++    # Peer opened the topic; the user @mentions this bot and follows up before the reply lands.
++    me, _ = _last_active_adapter(_msg("user", "ou_neo", "ou_peer"), _msg("app", PEER_APP_ID),
++                                 _msg("user", "ou_neo", "ou_me"))
++    assert _deliver(me) is True
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("user", "ou_neo", "ou_peer"))
++    assert _deliver(me) is False
++
++
++def test_last_active_bot_mentioning_another_bot_hands_the_topic_over():
++    # Peer's message @mentions this bot: the topic is this bot's.
++    me, _ = _last_active_adapter(_msg("app", PEER_APP_ID), _msg("app", PEER_APP_ID, "ou_me"))
++    assert _deliver(me) is True
++    # This bot's own message @mentions the peer: no longer this bot's.
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("app", APP_ID, "ou_peer"))
++    assert _deliver(me) is False
++
++
++def test_last_active_skips_plain_chatter_the_current_message_and_mention_all():
++    current = _msg("user", "ou_neo", message_id="om_current")
++    everyone = _msg("user", "ou_neo")
++    everyone.mentions = [SimpleNamespace(key="@_all", id="all", id_type="", name="所有人")]
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("user", "ou_ann"), everyone, current)
++    message = SimpleNamespace(thread_id="omt_1", message_id="om_current")
++    assert asyncio.run(me._topic_last_triggered_self(message.thread_id, message.message_id)) is True
++
++
++def test_last_active_topic_without_any_trigger_or_unreadable_is_not_followed():
++    me, _ = _last_active_adapter(_msg("user", "ou_neo"))
++    assert _deliver(me) is False
++    me, api = _last_active_adapter(_msg("app", APP_ID))
++    api.list = lambda request: SimpleNamespace(success=lambda: False, code=99991672, msg="no scope")
++    assert _deliver(me) is False
 diff --git a/website/docs/user-guide/messaging/feishu.md b/website/docs/user-guide/messaging/feishu.md
-index 3e1996633e..33c7c60b7c 100644
+index 3e1996633e..cbefbe45ef 100644
 --- a/website/docs/user-guide/messaging/feishu.md
 +++ b/website/docs/user-guide/messaging/feishu.md
-@@ -252,6 +252,24 @@ FEISHU_REQUIRE_MENTION=false
+@@ -252,6 +252,28 @@ FEISHU_REQUIRE_MENTION=false
  
  For per-chat control, set `require_mention` on a `group_rules` entry — see [Per-Group Access Control](#per-group-access-control) below.
  
@@ -754,11 +914,15 @@ index 3e1996633e..33c7c60b7c 100644
 +  feishu:
 +    extra:
 +      thread_reply: true    # answer a top-level group @mention in a new topic
-+      thread_follow: true   # inside a topic this bot owns, follow-ups need no @mention
++      thread_follow: true   # inside a topic, follow-ups need no @mention (true = last_active)
 +```
 +
 +- With `thread_reply`, Hermes first posts a short acknowledgement in a new topic on the triggering message, then runs the turn inside that topic, so the whole topic is one session.
-+- With `thread_follow`, a topic belongs to the bot that replied in it first. Its follow-ups are answered without an @mention; a message that @mentions someone else (a colleague or another bot) is left to them. A bot @mentioned once in another bot's topic answers that message only. Ownership is read from the topic itself, so it survives gateway restarts.
++- With `thread_follow`, a follow-up without an @mention is answered by the bot the topic currently belongs to; a message that @mentions someone else (a colleague or another bot) is left to them. Two modes decide who that is:
++  - `last_active` (also what `true` means): the bot triggered last. The newest message that was written by a bot or @mentions one decides, so a bot @mentioned mid-topic takes the topic over at once, even before its reply lands, and a bot message that @mentions another bot hands the topic to it. A person @mentioning someone else (Hermes cannot tell a colleague from a bot) leaves the topic quiet until a bot answers or is @mentioned again. Only the newest 20 messages are read, so a long stretch of un-@ chatter also leaves the topic quiet.
++  - `owner`: the bot that replied in the topic first keeps it. A bot @mentioned once in another bot's topic answers that message only.
++
++  Either way the decision is read from the topic itself, so it survives gateway restarts, and every Hermes bot in the chat reaches the same answer from the same history. A bot that does not run this feature never answers un-@ follow-ups, even when it was triggered last.
 +- The group policy still applies to every follow-up.
 +- Both keys can be set per chat on a `group_rules` entry, which overrides the global value.
 +- `thread_follow` needs the `im:message.group_msg` scope (read all group messages) on the Feishu app; without it Feishu only delivers @mentions.
@@ -766,12 +930,12 @@ index 3e1996633e..33c7c60b7c 100644
  ### Bot Identity
  
  Hermes auto-detects the bot's `open_id` and display name on startup. You only need to set these manually when auto-detection cannot reach the Feishu API, or when your app uses tenant-scoped user IDs:
-@@ -530,6 +548,8 @@ platforms:
+@@ -530,6 +552,8 @@ platforms:
          "oc_free_chat":
            policy: "open"
            require_mention: false       # overrides FEISHU_REQUIRE_MENTION for this chat
 +          thread_reply: true           # overrides platforms.feishu.extra.thread_reply
-+          thread_follow: true          # overrides platforms.feishu.extra.thread_follow
++          thread_follow: owner         # overrides platforms.feishu.extra.thread_follow (true | last_active | owner | false)
  ```
  
  | Policy | Description |

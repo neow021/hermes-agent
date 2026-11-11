@@ -6,7 +6,7 @@
 
 | 改动 | 分支 | 上游 PR | 状态 |
 |---|---|---|---|
-| 飞书话题：@ 后自动开话题回复（`thread_reply`）；话题内不用再 @（`thread_follow`） | `feat/feishu-topic-follow` | NousResearch/hermes-agent#151706 | 未合并，本机已在用 |
+| 飞书话题：@ 后自动开话题回复（`thread_reply`）；话题内不用再 @，由最后被触发的 bot 接手（`thread_follow: last_active`，`true` 同义；旧行为 `owner` = 开话题的 bot 一直接手） | `feat/feishu-topic-follow` | NousResearch/hermes-agent#151706 | 未合并，本机已在用 |
 
 ## 在别的机器上安装
 
@@ -29,7 +29,8 @@
 
 - feishu 配置（`~/.hermes/profiles/feishu/config.yaml`）中打开了：
   - `platforms.feishu.extra.thread_reply: true`
-  - `platforms.feishu.extra.thread_follow: true`
+  - `platforms.feishu.extra.thread_follow: true`（= `last_active`：话题里不带 @ 的消息，由最近一条"bot 发的或 @ 了某个 bot 的消息"对应的 bot 接手；想要旧行为写 `owner`）
+  - fable profile（`~/.hermes/profiles/fable/config.yaml`）同样打开了这两个开关；两个 bot 都要跑同一版补丁，判定才一致
   - `display.language: zh`，所以开话题时的提示语显示"收到，处理中…"
 - 飞书应用（`cli_aa7a9e3b7af9dce0`）已开通 `im:message.group_msg`（获取群组中所有消息）权限。没有这个权限，"话题内不用再 @"就收不到消息。
 - 改配置要用 `hermes config set`，不要手动编辑文件。
