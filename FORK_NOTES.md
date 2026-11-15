@@ -7,6 +7,7 @@
 | 改动 | 分支 | 上游 PR | 状态 |
 |---|---|---|---|
 | 飞书话题：@ 后自动开话题回复（`thread_reply`）；话题内不用再 @，由最后被触发的 bot 接手（`thread_follow: last_active`，`true` 同义；旧行为 `owner` = 开话题的 bot 一直接手） | `feat/feishu-topic-follow` | NousResearch/hermes-agent#151706 | 未合并，本机已在用 |
+| 飞书话题投递：发到话题的消息改用 reply API（`reply_in_thread`），不再用 `receive_id_type=thread_id` 调 create（飞书必拒 99992402）。否则 cron 提醒、话题里的图片/文件 全部静默丢 | 补丁文件 `feishu-topic-reply.patch`（尚未进 `feat/*` 分支） | 上游已有同类 PR：#94306、#146771 | 未合并，本机已在用 |
 
 ## 在别的机器上安装
 
@@ -14,7 +15,7 @@
 
 `gh api repos/neow021/.agents/contents/skills/hermes-feishu-setup/SKILL.md -H "Accept: application/vnd.github.raw"`
 
-补丁文件放在本分支：`feishu-topic-follow.patch`，skill 从这里下载。改安装步骤时改那个 skill，不改这里。
+补丁文件放在本分支：`feishu-topic-follow.patch`（话题功能）和 `feishu-topic-reply.patch`（话题投递走 reply API 的修复，必须一起打，否则 cron 提醒和话题里的图片/文件全部 99992402 静默丢），skill 从这里下载。改安装步骤时改那个 skill，不改这里。
 
 ## 本机的位置
 
@@ -22,7 +23,7 @@
 |---|---|
 | fork 开发目录 | `~/dev/hermes-agent`（`origin` = 本 fork，`upstream` = NousResearch） |
 | 本说明所在的 worktree | `~/dev/hermes-agent-notes`（`neo/notes` 分支） |
-| 补丁备份 | `~/dev/hermes-patches/feishu-topic-follow.patch` |
+| 补丁备份 | `~/dev/hermes-patches/feishu-topic-follow.patch`、`~/dev/hermes-patches/feishu-topic-reply.patch` |
 | 正在运行的 Hermes | `~/.hermes/hermes-agent`，补丁以**未提交改动**的形式打在上面 |
 
 ## 本机配置和权限
@@ -51,16 +52,19 @@
    ```bash
    git -C ~/.hermes/hermes-agent status --short plugins/platforms/feishu/
    ```
-   应该能看到 `feishu_topic_follow.py`（新文件）和 `adapter.py`（有改动）。如果没看到，或者提示有冲突，就把未提交的改动全部撤掉（同上面第 2 步的 `git checkout` 和 `rm`），再重新打补丁：
+   应该能看到 `feishu_topic_follow.py`（新文件）和 `adapter.py`（有改动），以及 `cron/scheduler_delivery.py`（有改动）。如果没看到，或者提示有冲突，就把未提交的改动全部撤掉（同上面第 2 步的 `git checkout` 和 `rm`），再重新打两个补丁：
    ```bash
-   cd ~/.hermes/hermes-agent && git apply ~/dev/hermes-patches/feishu-topic-follow.patch
+   cd ~/.hermes/hermes-agent
+   git apply ~/dev/hermes-patches/feishu-topic-follow.patch
+   git apply ~/dev/hermes-patches/feishu-topic-reply.patch
    ```
-   打不上的话，按下面"同步 fork"的步骤更新补丁，再重新打。
+   第二个补丁报 `patch does not apply` 说明上游改动了 `_send_raw_message` 或 `scheduler_delivery.py`：先 `git apply -3`，还不行就按下面"同步 fork"重新生成补丁，不要手工改代码。
 4. **重启 gateway**：在飞书里发 `/restart`，或者在 gateway 之外的终端执行 `hermes gateway restart`。
 5. **实测**：
    - 在群里 @ 机器人：会开一个新话题，先出现"收到，处理中…"，再出现正式回复。
    - 在那个话题里不 @ 说一句：机器人接着回。
    - 在话题里 @ 一位同事说一句：机器人不回。
+   - 话题投递（第二个补丁）：让 cron 往这个话题投一次（或 `hermes send --to feishu:<oc_id>:<omt_id> "测试"`）。消息要出现在话题里；如果日志出现 `[99992402] field validation failed`，说明第二个补丁没打上或没重启 gateway。
 
 ## 同步 fork（上游有新代码时）
 
@@ -79,3 +83,5 @@ git -C ~/dev/hermes-agent-notes commit -am "chore: refresh feishu-topic-follow p
 ```
 
 上游的代码检查有一条规则：`adapter.py` 只能变小、不能变大。新逻辑放进 `feishu_topic_follow.py`。
+
+第二个补丁 `feishu-topic-reply.patch` 不是从 `feat/*` 分支 `format-patch` 出来的，而是相对"当前安装版本 HEAD + feishu-topic-follow 补丁"生成的差分：生成方法是 `git worktree add` 出一个 HEAD 的干净副本、打上话题补丁作为基线，再把改好的 5 个文件覆盖上去做 diff（`adapter.py`、`feishu_topic_follow.py`、`cron/scheduler_delivery.py`、两个测试文件）。上游动了 `_send_raw_message` 之后要按同样方法重新生成。

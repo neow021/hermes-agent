@@ -1,0 +1,208 @@
+diff --git a/cron/scheduler_delivery.py b/cron/scheduler_delivery.py
+index 308bc24..9900a5f 100644
+--- a/cron/scheduler_delivery.py
++++ b/cron/scheduler_delivery.py
+@@ -1367,8 +1367,8 @@ def _live_send_text(
+         _warn_live_lane_failure(job, msg, t.is_relay)
+         target_errors.append(msg)
+         return False, False, None
+-    if send_raw_response and t.thread_id and send_raw_response.get("thread_fallback"):
+-        requested_thread_id = send_raw_response.get("requested_thread_id") or t.thread_id
++    if send_raw_response and t.thread_id and _result_field(send_raw_response, "thread_fallback"):
++        requested_thread_id = _result_field(send_raw_response, "requested_thread_id") or t.thread_id
+         _note_target_error(
+             job,
+             f"configured thread_id {requested_thread_id} for "
+diff --git a/plugins/platforms/feishu/adapter.py b/plugins/platforms/feishu/adapter.py
+index e428d60..d55b73e 100644
+--- a/plugins/platforms/feishu/adapter.py
++++ b/plugins/platforms/feishu/adapter.py
+@@ -3779,10 +3779,10 @@ class FeishuAdapter(FeishuChoiceCardsMixin, FeishuTopicFollowMixin, BasePlatform
+             )
+             request = self._build_reply_message_request(effective_reply_to, body)
+             return await self._run_blocking(self._client.im.v1.message.reply, request)
+-        if thread_id:
+-            # reply→create fallback inside a topic: thread_id as receive_id keeps it in the topic.
+-            receive_id, receive_id_type = thread_id, "thread_id"
+-        elif chat_id.startswith("feishu_user_id:"):
++        if thread_id and (anchored := await self._reply_into_topic(
++                thread_id, msg_type=msg_type, payload=payload)) is not None:  # create has no thread_id
++            return anchored
++        if chat_id.startswith("feishu_user_id:"):
+             receive_id, receive_id_type = chat_id.split(":", 1)[1], "user_id"
+         else:
+             receive_id, receive_id_type = chat_id, "open_id" if chat_id.startswith("ou_") else "chat_id"
+diff --git a/plugins/platforms/feishu/feishu_topic_follow.py b/plugins/platforms/feishu/feishu_topic_follow.py
+index 8a35c5b..b4bbc83 100644
+--- a/plugins/platforms/feishu/feishu_topic_follow.py
++++ b/plugins/platforms/feishu/feishu_topic_follow.py
+@@ -211,6 +211,23 @@ class FeishuTopicFollowMixin:
+             return None
+         return list(getattr(getattr(response, "data", None), "items", None) or [])
+ 
++    async def _reply_into_topic(self, thread_id: str, *, msg_type: str, payload: str) -> Optional[Any]:
++        """Post into a topic by replying to its last message, so the message stays in the topic.
++
++        The create-message API has no ``thread_id`` receive type (it answers ``99992402 field
++        validation failed``), so a topic with no reply anchor is only reachable via the reply API.
++        ``None`` means "no anchor readable": the caller sends into the chat instead of losing it.
++        """
++        anchor = await self._fetch_last_message_in_thread(thread_id)
++        if not anchor:
++            logger.warning("[Feishu] Topic %s has no message to anchor on; sending into the chat", thread_id)
++            return None
++        body = self._build_reply_message_body(
++            content=payload, msg_type=msg_type, reply_in_thread=True, uuid_value=str(uuid.uuid4()),
++        )
++        request = self._build_reply_message_request(anchor, body)
++        return await self._run_blocking(self._client.im.v1.message.reply, request)
++
+     async def _fetch_last_message_in_thread(self, thread_id: str) -> Optional[str]:
+         """Fetch the last message_id in a thread for reply-based routing."""
+         if not self._client or not thread_id:
+diff --git a/tests/gateway/test_feishu_topic_follow.py b/tests/gateway/test_feishu_topic_follow.py
+index 6221b3d..be471ca 100644
+--- a/tests/gateway/test_feishu_topic_follow.py
++++ b/tests/gateway/test_feishu_topic_follow.py
+@@ -315,3 +315,63 @@ def test_last_active_topic_without_any_trigger_or_unreadable_is_not_followed():
+     me, api = _last_active_adapter(_msg("app", APP_ID))
+     api.list = lambda request: SimpleNamespace(success=lambda: False, code=99991672, msg="no scope")
+     assert _deliver(me) is False
++
++
++# --- Delivering into a topic: reply into it, never create with a thread_id -----------------------
++#
++# Feishu's create-message API accepts only open_id/user_id/union_id/email/chat_id as
++# ``receive_id_type``; passing a thread_id there answers 400 ``99992402 field validation failed``.
++# Cron targets (origin carries a thread id, never a message id) and media sends (metadata but no
++# reply_to) both land on this path, so a topic without a reply anchor must be reached by replying
++# to its last message.
++
++
++class _FakeDeliveryApi(_FakeMessageApi):
++    """Adds the flat ``create`` call, so a test can prove which API was taken."""
++
++    def __init__(self, **kwargs):
++        super().__init__(**kwargs)
++        self.creates = []
++
++    def create(self, request):
++        self.creates.append(request)
++        return SimpleNamespace(success=lambda: True, data=SimpleNamespace(message_id="om_new"), code=0, msg="ok")
++
++
++def _delivery_adapter(api):
++    from plugins.platforms.feishu.adapter import FeishuAdapter
++
++    adapter = FeishuAdapter.__new__(FeishuAdapter)
++    adapter._init_topic_follow_state()
++    _wire_client(adapter, api)
++    return adapter
++
++
++def _deliver_into_topic(adapter, thread_id):
++    return asyncio.run(adapter._send_raw_message(
++        chat_id="oc_team", msg_type="text", payload=json.dumps({"text": "reminder"}), reply_to=None,
++        metadata={"thread_id": thread_id},
++    ))
++
++
++def test_topic_delivery_replies_to_the_topics_last_message():
++    api = _FakeDeliveryApi(topic_messages=[SimpleNamespace(message_id="om_last")])
++    adapter = _delivery_adapter(api)
++
++    assert _deliver_into_topic(adapter, "omt_1").success() is True
++    (request,) = api.replies
++    assert request.message_id == "om_last"
++    assert request.request_body.reply_in_thread is True
++    assert api.creates == []
++
++
++def test_topic_delivery_without_a_message_falls_back_to_the_chat():
++    api = _FakeDeliveryApi(topic_messages=[])
++    adapter = _delivery_adapter(api)
++
++    assert _deliver_into_topic(adapter, "omt_empty").success() is True
++    (request,) = api.creates
++    body = getattr(request, "request_body", None) or getattr(request, "body", None)
++    assert getattr(body, "receive_id", None) == "oc_team"
++    assert getattr(request, "receive_id_type", None) == "chat_id"
++    assert api.replies == []
+diff --git a/tests/gateway/test_stream_consumer_thread_routing.py b/tests/gateway/test_stream_consumer_thread_routing.py
+index 974a1d7..07390a2 100644
+--- a/tests/gateway/test_stream_consumer_thread_routing.py
++++ b/tests/gateway/test_stream_consumer_thread_routing.py
+@@ -106,73 +106,6 @@ class TestOverflowFirstMessage:
+         )
+ 
+ 
+-class TestFeishuFallbackThreadRouting:
+-    """Verify FeishuAdapter._send_raw_message routes to topic on fallback."""
+-
+-    @pytest.mark.asyncio
+-    async def test_create_uses_thread_id_when_available(self):
+-        """When reply_to=None and metadata has thread_id, message.create
+-        should use receive_id_type='thread_id'."""
+-        from plugins.platforms.feishu.adapter import FeishuAdapter
+-
+-        # We test the _send_raw_message method directly by mocking the client
+-        adapter = MagicMock(spec=FeishuAdapter)
+-
+-        # Set up the real _send_raw_message logic manually
+-        mock_client = MagicMock()
+-        mock_create_response = SimpleNamespace(
+-            success=lambda: True,
+-            data=SimpleNamespace(message_id="new_msg_1"),
+-        )
+-        mock_client.im.v1.message.create = MagicMock(return_value=mock_create_response)
+-
+-        # Use the real implementation path
+-        adapter._client = mock_client
+-        adapter._build_create_message_body = FeishuAdapter._build_create_message_body
+-        adapter._build_create_message_request = FeishuAdapter._build_create_message_request
+-        # _send_raw_message routes blocking SDK calls through _run_blocking
+-        # (adapter-owned executor). On a MagicMock(spec=...) that method is
+-        # auto-mocked and would swallow the real call, so wire a passthrough.
+-        async def _run_blocking_passthrough(func, *args):
+-            return func(*args)
+-        adapter._run_blocking = _run_blocking_passthrough
+-
+-        # Call _send_raw_message with reply_to=None and thread_id in metadata
+-        import json
+-        await FeishuAdapter._send_raw_message(
+-            adapter,
+-            chat_id="oc_main_chat",
+-            msg_type="text",
+-            payload=json.dumps({"text": "hello"}),
+-            reply_to=None,
+-            metadata={"thread_id": "omt_topic_abc"},
+-        )
+-
+-        # Verify message.create was called (not message.reply)
+-        mock_client.im.v1.message.create.assert_called_once()
+-
+-        # The request should have receive_id_type="thread_id"
+-        call_args = mock_client.im.v1.message.create.call_args[0][0]
+-        # Lark SDK builder exposes .body; the in-tree fallback exposes .request_body.
+-        # The contributor's branch had the lark SDK installed, the test environment
+-        # may not — handle both shapes.
+-        body = getattr(call_args, "body", None) or getattr(call_args, "request_body", None)
+-        assert body is not None, "request has neither .body nor .request_body"
+-        # receive_id should be the thread_id, not the chat_id
+-        receive_id = getattr(body, "receive_id", None)
+-        if receive_id is None and isinstance(body, str):
+-            import json as _json
+-            receive_id = _json.loads(body).get("receive_id")
+-        assert receive_id == "omt_topic_abc", (
+-            f"Expected receive_id='omt_topic_abc', got '{receive_id}'"
+-        )
+-        # And receive_id_type must be 'thread_id', not 'chat_id'
+-        receive_id_type = getattr(call_args, "receive_id_type", None)
+-        assert receive_id_type == "thread_id", (
+-            f"Expected receive_id_type='thread_id', got '{receive_id_type}'"
+-        )
+-
+-
+ class TestFallbackResendThreading:
+     """#103068: a full fallback resend replaces the preview, so it must land in
+     the originating thread; tail continuations keep their unthreaded delivery."""
