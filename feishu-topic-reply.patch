@@ -1,8 +1,32 @@
+From 2edafbd544998718308466968c64682e3d8c6a25 Mon Sep 17 00:00:00 2001
+From: Neo <65333514+neow021@users.noreply.github.com>
+Date: Tue, 17 Nov 2026 06:59:52 +0000
+Subject: [PATCH] fix(feishu): send anchorless topic messages as in-thread
+ replies
+
+Feishu's message.create rejects receive_id_type=thread_id with 99992402, so
+every topic send without an inbound message to reply to was dropped: cron
+deliver=origin reports, background-process completions and MEDIA files.
+
+_send_raw_message now replies into the topic (reply_in_thread on a message
+of that topic, via _reply_into_topic) instead of the invalid create path.
+cron's live lane reads thread_fallback/requested_thread_id with
+_result_field, so a SendResult no longer raises AttributeError and resends
+the report through the standalone path as a duplicate. The old routing test
+that asserted receive_id_type=thread_id against a mock is replaced.
+---
+ cron/scheduler_delivery.py                    |  4 +-
+ plugins/platforms/feishu/adapter.py           |  8 +--
+ .../platforms/feishu/feishu_topic_follow.py   | 17 +++++
+ tests/gateway/test_feishu_topic_follow.py     | 60 +++++++++++++++++
+ .../test_stream_consumer_thread_routing.py    | 67 -------------------
+ 5 files changed, 83 insertions(+), 73 deletions(-)
+
 diff --git a/cron/scheduler_delivery.py b/cron/scheduler_delivery.py
-index 308bc24..9900a5f 100644
+index 3c49e0f6cb..2270143052 100644
 --- a/cron/scheduler_delivery.py
 +++ b/cron/scheduler_delivery.py
-@@ -1367,8 +1367,8 @@ def _live_send_text(
+@@ -1339,8 +1339,8 @@ def _live_send_text(
          _warn_live_lane_failure(job, msg, t.is_relay)
          target_errors.append(msg)
          return False, False, None
@@ -14,10 +38,10 @@ index 308bc24..9900a5f 100644
              job,
              f"configured thread_id {requested_thread_id} for "
 diff --git a/plugins/platforms/feishu/adapter.py b/plugins/platforms/feishu/adapter.py
-index e428d60..d55b73e 100644
+index 48f1dc1bcf..9e488d513d 100644
 --- a/plugins/platforms/feishu/adapter.py
 +++ b/plugins/platforms/feishu/adapter.py
-@@ -3779,10 +3779,10 @@ class FeishuAdapter(FeishuChoiceCardsMixin, FeishuTopicFollowMixin, BasePlatform
+@@ -3696,10 +3696,10 @@ class FeishuAdapter(
              )
              request = self._build_reply_message_request(effective_reply_to, body)
              return await self._run_blocking(self._client.im.v1.message.reply, request)
@@ -33,7 +57,7 @@ index e428d60..d55b73e 100644
          else:
              receive_id, receive_id_type = chat_id, "open_id" if chat_id.startswith("ou_") else "chat_id"
 diff --git a/plugins/platforms/feishu/feishu_topic_follow.py b/plugins/platforms/feishu/feishu_topic_follow.py
-index 8a35c5b..b4bbc83 100644
+index 8a35c5bdb6..b4bbc83a0a 100644
 --- a/plugins/platforms/feishu/feishu_topic_follow.py
 +++ b/plugins/platforms/feishu/feishu_topic_follow.py
 @@ -211,6 +211,23 @@ class FeishuTopicFollowMixin:
@@ -61,7 +85,7 @@ index 8a35c5b..b4bbc83 100644
          """Fetch the last message_id in a thread for reply-based routing."""
          if not self._client or not thread_id:
 diff --git a/tests/gateway/test_feishu_topic_follow.py b/tests/gateway/test_feishu_topic_follow.py
-index 6221b3d..be471ca 100644
+index 6221b3d361..be471ca22b 100644
 --- a/tests/gateway/test_feishu_topic_follow.py
 +++ b/tests/gateway/test_feishu_topic_follow.py
 @@ -315,3 +315,63 @@ def test_last_active_topic_without_any_trigger_or_unreadable_is_not_followed():
@@ -129,7 +153,7 @@ index 6221b3d..be471ca 100644
 +    assert getattr(request, "receive_id_type", None) == "chat_id"
 +    assert api.replies == []
 diff --git a/tests/gateway/test_stream_consumer_thread_routing.py b/tests/gateway/test_stream_consumer_thread_routing.py
-index 974a1d7..07390a2 100644
+index 974a1d76f9..07390a2f63 100644
 --- a/tests/gateway/test_stream_consumer_thread_routing.py
 +++ b/tests/gateway/test_stream_consumer_thread_routing.py
 @@ -106,73 +106,6 @@ class TestOverflowFirstMessage:
@@ -206,3 +230,6 @@ index 974a1d7..07390a2 100644
  class TestFallbackResendThreading:
      """#103068: a full fallback resend replaces the preview, so it must land in
      the originating thread; tail continuations keep their unthreaded delivery."""
+-- 
+2.43.0
+
