@@ -315,3 +315,63 @@ def test_last_active_topic_without_any_trigger_or_unreadable_is_not_followed():
     me, api = _last_active_adapter(_msg("app", APP_ID))
     api.list = lambda request: SimpleNamespace(success=lambda: False, code=99991672, msg="no scope")
     assert _deliver(me) is False
+
+
+# --- Delivering into a topic: reply into it, never create with a thread_id -----------------------
+#
+# Feishu's create-message API accepts only open_id/user_id/union_id/email/chat_id as
+# ``receive_id_type``; passing a thread_id there answers 400 ``99992402 field validation failed``.
+# Cron targets (origin carries a thread id, never a message id) and media sends (metadata but no
+# reply_to) both land on this path, so a topic without a reply anchor must be reached by replying
+# to its last message.
+
+
+class _FakeDeliveryApi(_FakeMessageApi):
+    """Adds the flat ``create`` call, so a test can prove which API was taken."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.creates = []
+
+    def create(self, request):
+        self.creates.append(request)
+        return SimpleNamespace(success=lambda: True, data=SimpleNamespace(message_id="om_new"), code=0, msg="ok")
+
+
+def _delivery_adapter(api):
+    from plugins.platforms.feishu.adapter import FeishuAdapter
+
+    adapter = FeishuAdapter.__new__(FeishuAdapter)
+    adapter._init_topic_follow_state()
+    _wire_client(adapter, api)
+    return adapter
+
+
+def _deliver_into_topic(adapter, thread_id):
+    return asyncio.run(adapter._send_raw_message(
+        chat_id="oc_team", msg_type="text", payload=json.dumps({"text": "reminder"}), reply_to=None,
+        metadata={"thread_id": thread_id},
+    ))
+
+
+def test_topic_delivery_replies_to_the_topics_last_message():
+    api = _FakeDeliveryApi(topic_messages=[SimpleNamespace(message_id="om_last")])
+    adapter = _delivery_adapter(api)
+
+    assert _deliver_into_topic(adapter, "omt_1").success() is True
+    (request,) = api.replies
+    assert request.message_id == "om_last"
+    assert request.request_body.reply_in_thread is True
+    assert api.creates == []
+
+
+def test_topic_delivery_without_a_message_falls_back_to_the_chat():
+    api = _FakeDeliveryApi(topic_messages=[])
+    adapter = _delivery_adapter(api)
+
+    assert _deliver_into_topic(adapter, "omt_empty").success() is True
+    (request,) = api.creates
+    body = getattr(request, "request_body", None) or getattr(request, "body", None)
+    assert getattr(body, "receive_id", None) == "oc_team"
+    assert getattr(request, "receive_id_type", None) == "chat_id"
+    assert api.replies == []

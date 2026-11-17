@@ -211,6 +211,23 @@ class FeishuTopicFollowMixin:
             return None
         return list(getattr(getattr(response, "data", None), "items", None) or [])
 
+    async def _reply_into_topic(self, thread_id: str, *, msg_type: str, payload: str) -> Optional[Any]:
+        """Post into a topic by replying to its last message, so the message stays in the topic.
+
+        The create-message API has no ``thread_id`` receive type (it answers ``99992402 field
+        validation failed``), so a topic with no reply anchor is only reachable via the reply API.
+        ``None`` means "no anchor readable": the caller sends into the chat instead of losing it.
+        """
+        anchor = await self._fetch_last_message_in_thread(thread_id)
+        if not anchor:
+            logger.warning("[Feishu] Topic %s has no message to anchor on; sending into the chat", thread_id)
+            return None
+        body = self._build_reply_message_body(
+            content=payload, msg_type=msg_type, reply_in_thread=True, uuid_value=str(uuid.uuid4()),
+        )
+        request = self._build_reply_message_request(anchor, body)
+        return await self._run_blocking(self._client.im.v1.message.reply, request)
+
     async def _fetch_last_message_in_thread(self, thread_id: str) -> Optional[str]:
         """Fetch the last message_id in a thread for reply-based routing."""
         if not self._client or not thread_id:
