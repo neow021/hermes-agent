@@ -83,7 +83,7 @@ HERMES_PYTHON=~/.hermes/hermes-agent/venv/bin/python scripts/run_tests.sh \
 export PATH=~/.hermes/tools/node-26.12.1-linux-arm64/bin:~/.hermes/tools/npm-12.0.2-linux-arm64/bin:$PATH
 ~/.hermes/hermes-agent/venv/bin/python scripts/check --base upstream/main   # 必须写 --base：fork 自己的 main 很旧，默认对比会扫上千个文件、十几分钟跑不完
 git push -f origin feat/feishu-topic-follow feat/feishu-topic-reply          # PR #151706 会自动更新
-git format-patch -1 feat/feishu-topic-follow --stdout > ~/dev/hermes-patches/feishu-topic-follow.patch
+git format-patch -1 feat/feishu-topic-follow --base=upstream/main --stdout > ~/dev/hermes-patches/feishu-topic-follow.patch   # --base 写入 base-commit 行，setup skill 靠它判断对方 Hermes 是否太旧
 git format-patch -1 feat/feishu-topic-reply  --stdout > ~/dev/hermes-patches/feishu-topic-reply.patch
 cp ~/dev/hermes-patches/*.patch ~/dev/hermes-agent-notes/                    # setup skill 从 neo/notes 下载
 git -C ~/dev/hermes-agent-notes commit -am "chore: refresh feishu patches" && git -C ~/dev/hermes-agent-notes push
