@@ -1,0 +1,886 @@
+diff --git a/locales/af.yaml b/locales/af.yaml
+index c90d988494..2580576db7 100644
+--- a/locales/af.yaml
++++ b/locales/af.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Slegs 'n gemagtigde Matrix-gebruiker kan hierdie kontroles gebruik."
+       not_requester: "Slegs die gebruiker wat hierdie aksie aangevra het, kan hierdie kontroles gebruik."
+   feishu:
++    topic:
++      opened: "Ontvang, besig…"
+     clarify:
+       title: "Hermes het jou insette nodig"
+       other: "✏️ Ander (tik antwoord)"
+diff --git a/locales/ar.yaml b/locales/ar.yaml
+index 80958dd20e..59aa7776bd 100644
+--- a/locales/ar.yaml
++++ b/locales/ar.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "لا يمكن استخدام عناصر التحكم هذه إلا لمستخدم Matrix مصرّح له."
+       not_requester: "لا يمكن استخدام عناصر التحكم هذه إلا للمستخدم الذي طلب هذا الإجراء."
+   feishu:
++    topic:
++      opened: "تم الاستلام، جارٍ العمل…"
+     clarify:
+       title: "Hermes يحتاج إلى ردّك"
+       other: "✏️ غير ذلك (اكتب الإجابة)"
+diff --git a/locales/de.yaml b/locales/de.yaml
+index c0654952de..7b9829b2bb 100644
+--- a/locales/de.yaml
++++ b/locales/de.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Nur ein autorisierter Matrix-Benutzer kann diese Steuerelemente verwenden."
+       not_requester: "Nur der Benutzer, der diese Aktion angefordert hat, kann diese Steuerelemente verwenden."
+   feishu:
++    topic:
++      opened: "Erhalten, wird bearbeitet…"
+     clarify:
+       title: "Hermes benötigt Ihre Eingabe"
+       other: "✏️ Eigene Antwort"
+diff --git a/locales/en.yaml b/locales/en.yaml
+index 8170887068..61a716894a 100644
+--- a/locales/en.yaml
++++ b/locales/en.yaml
+@@ -1431,6 +1431,8 @@ platform:
+       not_requester: "Only the user who requested this action can use these controls."
+ 
+   feishu:
++    topic:
++      opened: "Got it, working on it…"
+     clarify:
+       title: "Hermes needs your input"
+       other: "✏️ Other (type answer)"
+diff --git a/locales/es.yaml b/locales/es.yaml
+index 4b00392718..2054ebe840 100644
+--- a/locales/es.yaml
++++ b/locales/es.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Solo un usuario autorizado de Matrix puede usar estos controles."
+       not_requester: "Solo el usuario que solicitó esta acción puede usar estos controles."
+   feishu:
++    topic:
++      opened: "Recibido, trabajando en ello…"
+     clarify:
+       title: "Hermes necesita tu respuesta"
+       other: "✏️ Otra (escribir respuesta)"
+diff --git a/locales/fr.yaml b/locales/fr.yaml
+index 470642dc16..661be7638f 100644
+--- a/locales/fr.yaml
++++ b/locales/fr.yaml
+@@ -1592,6 +1592,8 @@ platform:
+       unauthorized: "Seul un utilisateur Matrix autorisé peut utiliser ces contrôles."
+       not_requester: "Seul l'utilisateur à l'origine de cette action peut utiliser ces contrôles."
+   feishu:
++    topic:
++      opened: "Bien reçu, je m'en occupe…"
+     clarify:
+       title: "Hermes a besoin de votre réponse"
+       other: "✏️ Autre (saisir)"
+diff --git a/locales/ga.yaml b/locales/ga.yaml
+index 5e3e74086e..f337f184ba 100644
+--- a/locales/ga.yaml
++++ b/locales/ga.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Ní féidir ach le húsáideoir Matrix údaraithe na rialtáin seo a úsáid."
+       not_requester: "Ní féidir ach leis an úsáideoir a d'iarr an gníomh seo na rialtáin seo a úsáid."
+   feishu:
++    topic:
++      opened: "Faighte, ag obair air…"
+     clarify:
+       title: "Tá d'ionchur de dhíth ar Hermes"
+       other: "✏️ Eile (clóscríobh freagra)"
+diff --git a/locales/hu.yaml b/locales/hu.yaml
+index 994c7a853e..23fcf1046d 100644
+--- a/locales/hu.yaml
++++ b/locales/hu.yaml
+@@ -1388,6 +1388,8 @@ platform:
+       unauthorized: "Ezeket a vezérlőket csak jogosult Matrix-felhasználó használhatja."
+       not_requester: "Ezeket a vezérlőket csak az a felhasználó használhatja, aki a műveletet kérte."
+   feishu:
++    topic:
++      opened: "Megkaptam, dolgozom rajta…"
+     clarify:
+       title: "A Hermes a válaszodra vár"
+       other: "✏️ Egyéb (írd be a választ)"
+diff --git a/locales/it.yaml b/locales/it.yaml
+index 60013cd10d..6dfe471f2f 100644
+--- a/locales/it.yaml
++++ b/locales/it.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Solo un utente Matrix autorizzato può usare questi controlli."
+       not_requester: "Solo l'utente che ha richiesto questa azione può usare questi controlli."
+   feishu:
++    topic:
++      opened: "Ricevuto, ci sto lavorando…"
+     clarify:
+       title: "Hermes ha bisogno del tuo contributo"
+       other: "✏️ Altro (digita)"
+diff --git a/locales/ja.yaml b/locales/ja.yaml
+index fa149f6010..2f7c85711b 100644
+--- a/locales/ja.yaml
++++ b/locales/ja.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "これらの操作は、認可された Matrix ユーザーのみが使用できます。"
+       not_requester: "これらの操作は、このアクションをリクエストしたユーザーのみが使用できます。"
+   feishu:
++    topic:
++      opened: "受け付けました。処理中…"
+     clarify:
+       title: "Hermes が入力を求めています"
+       other: "✏️ その他（回答を入力）"
+diff --git a/locales/ko.yaml b/locales/ko.yaml
+index c303139969..df46ec3a89 100644
+--- a/locales/ko.yaml
++++ b/locales/ko.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "권한이 있는 Matrix 사용자만 이 컨트롤을 사용할 수 있어요."
+       not_requester: "이 작업을 요청한 사용자만 이 컨트롤을 사용할 수 있어요."
+   feishu:
++    topic:
++      opened: "확인했습니다. 처리 중…"
+     clarify:
+       title: "Hermes가 입력을 기다리고 있어요"
+       other: "✏️ 기타 (직접 입력)"
+diff --git a/locales/pt.yaml b/locales/pt.yaml
+index 2cf555c093..4310991c84 100644
+--- a/locales/pt.yaml
++++ b/locales/pt.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Somente um usuário autorizado do Matrix pode usar estes controles."
+       not_requester: "Somente o usuário que solicitou esta ação pode usar estes controles."
+   feishu:
++    topic:
++      opened: "Recebido, trabalhando nisso…"
+     clarify:
+       title: "O Hermes precisa da sua resposta"
+       other: "✏️ Outro (digitar resposta)"
+diff --git a/locales/ru.yaml b/locales/ru.yaml
+index 25022b56dc..1c88101135 100644
+--- a/locales/ru.yaml
++++ b/locales/ru.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Этими элементами управления может пользоваться только авторизованный пользователь Matrix."
+       not_requester: "Этими элементами управления может пользоваться только тот, кто запросил это действие."
+   feishu:
++    topic:
++      opened: "Принято, работаю…"
+     clarify:
+       title: "Hermes нужен ваш ответ"
+       other: "✏️ Другое (ввести ответ)"
+diff --git a/locales/tr.yaml b/locales/tr.yaml
+index fc00610f03..304d45ced9 100644
+--- a/locales/tr.yaml
++++ b/locales/tr.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Bu kontrolleri yalnızca yetkili bir Matrix kullanıcısı kullanabilir."
+       not_requester: "Bu kontrolleri yalnızca bu işlemi isteyen kullanıcı kullanabilir."
+   feishu:
++    topic:
++      opened: "Alındı, üzerinde çalışıyorum…"
+     clarify:
+       title: "Hermes girdinize ihtiyaç duyuyor"
+       other: "✏️ Diğer (yanıt yazın)"
+diff --git a/locales/uk.yaml b/locales/uk.yaml
+index f79eaaaf93..979ad9459a 100644
+--- a/locales/uk.yaml
++++ b/locales/uk.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "Ці елементи керування доступні лише авторизованому користувачу Matrix."
+       not_requester: "Ці елементи керування доступні лише користувачу, який запросив цю дію."
+   feishu:
++    topic:
++      opened: "Прийнято, працюю…"
+     clarify:
+       title: "Hermes потребує вашої відповіді"
+       other: "✏️ Інше (ввести відповідь)"
+diff --git a/locales/zh-hant.yaml b/locales/zh-hant.yaml
+index 7ee2ec5d5c..e69581447b 100644
+--- a/locales/zh-hant.yaml
++++ b/locales/zh-hant.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "只有已授權的 Matrix 使用者可以使用這些控制項。"
+       not_requester: "只有提出此操作的使用者可以使用這些控制項。"
+   feishu:
++    topic:
++      opened: "收到，處理中…"
+     clarify:
+       title: "Hermes 需要你的輸入"
+       other: "✏️ 其他（輸入答案）"
+diff --git a/locales/zh.yaml b/locales/zh.yaml
+index 4cd199efc4..65b2c6d4a7 100644
+--- a/locales/zh.yaml
++++ b/locales/zh.yaml
+@@ -1371,6 +1371,8 @@ platform:
+       unauthorized: "只有已授权的 Matrix 用户才能使用这些控件。"
+       not_requester: "只有发起此操作的用户才能使用这些控件。"
+   feishu:
++    topic:
++      opened: "收到，处理中…"
+     clarify:
+       title: "Hermes 需要你的输入"
+       other: "✏️ 其他（输入回答）"
+diff --git a/plugins/platforms/feishu/adapter.py b/plugins/platforms/feishu/adapter.py
+index b41b13c803..c1324aa8c7 100644
+--- a/plugins/platforms/feishu/adapter.py
++++ b/plugins/platforms/feishu/adapter.py
+@@ -94,6 +94,7 @@ from gateway.platforms.base import (
+ from gateway.platforms.event import MessageEvent, MessageType, ProcessingOutcome
+ from gateway.platforms.helpers import send_chunks
+ from plugins.platforms.feishu.adapter_choice_cards import FeishuChoiceCardsMixin
++from plugins.platforms.feishu.feishu_topic_follow import FeishuTopicFollowMixin
+ from gateway.status import acquire_scoped_lock
+ from gateway.status_scoped_locks import release_scoped_lock
+ from hermes_constants import get_hermes_home
+@@ -1286,7 +1287,7 @@ def _sdk_build(request_cls: Any, **fields: Any) -> Any:
+     return builder.build()
+ 
+ 
+-class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
++class FeishuAdapter(FeishuChoiceCardsMixin, FeishuTopicFollowMixin, BasePlatformAdapter):
+     """Feishu/Lark bot adapter."""
+     # Answers /p/<profile>/... on the default listener for a served secondary (shared_ingress).
+     serves_profile_prefix: bool = True
+@@ -1347,6 +1348,7 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+         self._update_prompt_state: dict[int, dict[str, str]] = {}
+         self._update_prompt_counter = itertools.count(1)
+         self._init_choice_card_state()
++        self._init_topic_follow_state()
+         # Reaction deletion needs the opaque reaction_id from create, cached per message_id.
+         self._pending_processing_reactions: OrderedDict[str, str] = OrderedDict()
+         self._load_seen_message_ids()
+@@ -2126,6 +2128,8 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+             logger.debug("[Feishu] Dropping duplicate/missing message_id: %s", message_id)
+             return
+         reason = self._admit(sender, message)
++        if reason == "group_policy_rejected" and await self._topic_follow_admits(sender, message):
++            reason = None
+         if reason is not None:
+             logger.debug("[Feishu] dropping inbound event: %s", reason)
+             if reason == "group_policy_rejected":
+@@ -2678,6 +2682,8 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+             or getattr(sender_id, "union_id", None) or "<unknown>"
+         )
+         chat_id = getattr(message, "chat_id", "") or ""
++        if not thread_id and chat_type != "p2p":
++            thread_id = await self._open_reply_topic(chat_id, message_id)
+         logger.info(
+             "[Feishu] Inbound %s message received: id=%s type=%s chat_id=%s sender=%s:%s text=%r media=%d",
+             "dm" if chat_type == "p2p" else "group", message_id, inbound_type.value, chat_id,
+@@ -3765,22 +3771,6 @@ class FeishuAdapter(FeishuChoiceCardsMixin, BasePlatformAdapter):
+             chat_id=chat_id, msg_type=msg_type, payload=payload, reply_to=reply_to, metadata=metadata,
+         )
+ 
+-    async def _fetch_last_message_in_thread(self, thread_id: str) -> Optional[str]:
+-        """Fetch the last message_id in a thread for reply-based routing."""
+-        if not self._client or not thread_id:
+-            return None
+-        try:
+-            from lark_oapi.api.im.v1 import ListMessageRequest
+-            request = ListMessageRequest.builder().container_id_type("thread").container_id(thread_id).page_size(1).build()
+-            response = await self._run_blocking(self._client.im.v1.message.list, request)
+-            if self._response_succeeded(response):
+-                items = getattr(getattr(response, "data", None), "items", None)
+-                if items and len(items) > 0:
+-                    return getattr(items[0], "message_id", None)
+-        except Exception as exc:
+-            logger.debug("[Feishu] Failed to fetch last message in thread %s: %s", thread_id, exc)
+-        return None
+-
+     async def _send_raw_message(
+         self, *, chat_id: str, msg_type: str, payload: str, reply_to: Optional[str], metadata: Optional[dict[str, Any]],
+     ) -> Any:
+diff --git a/plugins/platforms/feishu/feishu_topic_follow.py b/plugins/platforms/feishu/feishu_topic_follow.py
+new file mode 100644
+index 0000000000..8a35c5bdb6
+--- /dev/null
++++ b/plugins/platforms/feishu/feishu_topic_follow.py
+@@ -0,0 +1,228 @@
++"""Feishu topic follow: answer a group @mention inside a new topic, then keep answering in it.
++
++Mixed into ``FeishuAdapter``. Two opt-in switches under ``platforms.feishu.extra`` (each
++overridable on a ``group_rules`` entry):
++
++- ``thread_reply``: a top-level group message that triggers the bot gets its reply in a new
++  topic. A short in-thread acknowledgement opens the topic before the turn runs, so the first
++  turn already belongs to the topic's session instead of the group's.
++- ``thread_follow``: inside a topic, follow-ups need no @mention. A message that @mentions
++  someone else (a colleague, another bot) is left to them. Who answers depends on the mode:
++
++  - ``last_active`` (``true`` means this): the bot triggered last in the topic — the newest
++    message either written by a bot or @mentioning one decides. A bot @mentioned mid-topic takes
++    the topic over at once, even before it has replied, and a bot message @mentioning another bot
++    hands the topic to it.
++  - ``owner``: the bot that replied in the topic first keeps it; a bot @mentioned once in another
++    bot's topic answers that message only.
++
++Either way the decision is read from the topic itself, so it survives gateway restarts without a
++state file, and every bot in the chat reaches the same answer from the same history.
++"""
++
++from __future__ import annotations
++
++import json
++import logging
++import uuid
++from typing import Any, Optional
++
++from agent.i18n import t
++
++logger = logging.getLogger(__name__)
++
++# Messages scanned for the first bot reply; a topic with more human messages before any bot reply
++# is treated as unowned.
++_OWNER_SCAN_PAGE_SIZE = 50
++_OWNER_CACHE_MAX = 4096
++# Newest messages scanned for the last trigger; older un-@ chatter than this leaves the topic idle.
++_LAST_ACTIVE_SCAN_PAGE_SIZE = 20
++
++FOLLOW_LAST_ACTIVE = "last_active"
++FOLLOW_OWNER = "owner"
++_FOLLOW_MODES = {FOLLOW_LAST_ACTIVE, FOLLOW_OWNER}
++
++
++def _is_mention_all(mention: Any) -> bool:
++    return getattr(mention, "key", None) == "@_all" or getattr(mention, "id", None) == "all"
++
++
++class FeishuTopicFollowMixin:
++    """Topic opening and no-@ follow-ups for ``FeishuAdapter`` (needs its client/send helpers)."""
++
++    def _init_topic_follow_state(self) -> None:
++        # thread_id -> owned by this bot. Only settled answers are cached: a topic no bot has
++        # answered yet is asked again, since this bot may still become its owner.
++        self._topic_owner_cache: dict[str, bool] = {}
++
++    def _topic_option(self, chat_id: str, key: str) -> bool:
++        from plugins.platforms.feishu.adapter import _to_boolean
++
++        extra = getattr(getattr(self, "config", None), "extra", None) or {}
++        rules = extra.get("group_rules")
++        rule = rules.get(chat_id) if isinstance(rules, dict) and chat_id else None
++        if isinstance(rule, dict) and key in rule:
++            return _to_boolean(rule[key])
++        return _to_boolean(extra.get(key, False))
++
++    def _topic_follow_mode(self, chat_id: str) -> Optional[str]:
++        """``last_active`` / ``owner`` when ``thread_follow`` is on for the chat, else ``None``."""
++        extra = getattr(getattr(self, "config", None), "extra", None) or {}
++        rules = extra.get("group_rules")
++        rule = rules.get(chat_id) if isinstance(rules, dict) and chat_id else None
++        value = rule["thread_follow"] if isinstance(rule, dict) and "thread_follow" in rule else extra.get("thread_follow")
++        mode = str(value).strip().lower() if isinstance(value, str) else None
++        if mode in _FOLLOW_MODES:
++            return mode
++        return FOLLOW_LAST_ACTIVE if self._topic_option(chat_id, "thread_follow") else None
++
++    def _remember_topic_owner(self, thread_id: str, owned: bool) -> None:
++        cache = self._topic_owner_cache
++        if thread_id not in cache and len(cache) >= _OWNER_CACHE_MAX:
++            cache.pop(next(iter(cache)))
++        cache[thread_id] = owned
++
++    async def _open_reply_topic(self, chat_id: str, message_id: str) -> Optional[str]:
++        """Open a topic on a group message with an in-thread acknowledgement; return its id.
++
++        ``None`` (switch off, or Feishu refused) keeps the ordinary in-group reply.
++        """
++        if not self._topic_option(chat_id, "thread_reply") or not self._client:
++            return None
++        payload = json.dumps({"text": t("platform.feishu.topic.opened")}, ensure_ascii=False)
++        body = self._build_reply_message_body(
++            content=payload, msg_type="text", reply_in_thread=True, uuid_value=str(uuid.uuid4()),
++        )
++        request = self._build_reply_message_request(message_id, body)
++        try:
++            response = await self._run_blocking(self._client.im.v1.message.reply, request)
++        except Exception as exc:
++            logger.warning("[Feishu] Could not open a topic on %s: %s", message_id, exc, exc_info=True)
++            return None
++        thread_id = self._extract_response_field(response, "thread_id")
++        if not thread_id:
++            logger.warning(
++                "[Feishu] Could not open a topic on %s: [%s] %s", message_id,
++                getattr(response, "code", "?"), getattr(response, "msg", "no thread_id returned"),
++            )
++            return None
++        self._remember_topic_owner(thread_id, True)
++        return thread_id
++
++    async def _topic_follow_admits(self, sender: Any, message: Any) -> bool:
++        """Admit a topic message that was rejected only for lacking an @mention of this bot."""
++        from plugins.platforms.feishu.adapter import _is_bot_sender
++
++        chat_id = getattr(message, "chat_id", "") or ""
++        thread_id = getattr(message, "thread_id", None)
++        mode = self._topic_follow_mode(chat_id)
++        if not thread_id or getattr(message, "chat_type", "p2p") == "p2p" or _is_bot_sender(sender) or not mode:
++            return False
++        # The mention gate and the group policy share one reject reason: re-check the policy.
++        if not self._allow_group_message(getattr(sender, "sender_id", None), chat_id):
++            return False
++        # Any @mention left here is of someone else: an @ of this bot (or @all) was admitted.
++        if getattr(message, "mentions", None):
++            return False
++        if mode == FOLLOW_OWNER:
++            return await self._topic_owned_by_self(thread_id)
++        return await self._topic_last_triggered_self(thread_id, getattr(message, "message_id", "") or "")
++
++    async def _topic_last_triggered_self(self, thread_id: str, current_message_id: str) -> bool:
++        """Whether this bot is the one triggered last in the topic (newest message first).
++
++        Never cached: every bot @mention or reply can move the topic to another bot.
++        """
++        items = await self._list_topic_messages(thread_id, "ByCreateTimeDesc", _LAST_ACTIVE_SCAN_PAGE_SIZE)
++        for item in items or []:
++            if getattr(item, "message_id", None) == current_message_id:
++                continue
++            decided = self._trigger_decision(item)
++            if decided is not None:
++                return decided
++        return False
++
++    def _trigger_decision(self, item: Any) -> Optional[bool]:
++        """True/False when ``item`` settles who was triggered last; ``None`` to look further back.
++
++        - @mentions this bot (from a person or a peer bot handing over) -> this bot.
++        - written by a bot -> that bot, unless it @mentions others (a handover to them).
++        - a person @mentioning others -> them; this bot cannot tell a colleague from a bot,
++          so the topic goes quiet until a bot answers or is @mentioned again.
++        - a person without @mentions (or with only @all) -> look further back.
++        """
++        mentions = [m for m in getattr(item, "mentions", None) or [] if not _is_mention_all(m)]
++        if any(self._history_mention_is_self(m) for m in mentions):
++            return True
++        sender = getattr(item, "sender", None)
++        if getattr(sender, "sender_type", "") == "app":
++            # GET/list report sender.id = app_id for bot messages.
++            return not mentions and str(getattr(sender, "id", "") or "") == self._app_id
++        return False if mentions else None
++
++    def _history_mention_is_self(self, mention: Any) -> bool:
++        # list/GET mentions carry ``id`` as a plain app-scoped open_id string; events nest it.
++        mention_id = getattr(mention, "id", None)
++        open_id = mention_id if isinstance(mention_id, str) else getattr(mention_id, "open_id", None)
++        return self._bot_identity().matches(
++            open_id=(open_id or "").strip(), user_id="", name=(getattr(mention, "name", None) or "").strip(),
++        )
++
++    async def _topic_owned_by_self(self, thread_id: str) -> bool:
++        cached = self._topic_owner_cache.get(thread_id)
++        if cached is not None:
++            return cached
++        owner = await self._first_bot_sender_in_topic(thread_id)
++        if owner is None:
++            return False
++        owned = owner == self._app_id
++        self._remember_topic_owner(thread_id, owned)
++        return owned
++
++    async def _first_bot_sender_in_topic(self, thread_id: str) -> Optional[str]:
++        """App id of the first bot-authored message in a topic; ``None`` if none or unreadable."""
++        for item in await self._list_topic_messages(thread_id, "ByCreateTimeAsc", _OWNER_SCAN_PAGE_SIZE) or []:
++            sender = getattr(item, "sender", None)
++            # GET/list report sender.id = app_id for bot messages; peer bots differ only there.
++            if getattr(sender, "sender_type", "") == "app":
++                return str(getattr(sender, "id", "") or "")
++        return None
++
++    async def _list_topic_messages(self, thread_id: str, sort_type: str, page_size: int) -> Optional[list]:
++        """One page of a topic's messages; ``None`` if it cannot be read."""
++        if not self._client:
++            return None
++        from lark_oapi.api.im.v1 import ListMessageRequest
++
++        request = (
++            ListMessageRequest.builder().container_id_type("thread").container_id(thread_id)
++            .sort_type(sort_type).page_size(page_size).build()
++        )
++        try:
++            response = await self._run_blocking(self._client.im.v1.message.list, request)
++        except Exception as exc:
++            logger.warning("[Feishu] Could not read topic %s: %s", thread_id, exc, exc_info=True)
++            return None
++        if not self._response_succeeded(response):
++            logger.warning(
++                "[Feishu] Could not read topic %s: [%s] %s", thread_id,
++                getattr(response, "code", "?"), getattr(response, "msg", ""),
++            )
++            return None
++        return list(getattr(getattr(response, "data", None), "items", None) or [])
++
++    async def _fetch_last_message_in_thread(self, thread_id: str) -> Optional[str]:
++        """Fetch the last message_id in a thread for reply-based routing."""
++        if not self._client or not thread_id:
++            return None
++        try:
++            from lark_oapi.api.im.v1 import ListMessageRequest
++            request = ListMessageRequest.builder().container_id_type("thread").container_id(thread_id).page_size(1).build()
++            response = await self._run_blocking(self._client.im.v1.message.list, request)
++            if self._response_succeeded(response):
++                items = getattr(getattr(response, "data", None), "items", None)
++                if items and len(items) > 0:
++                    return getattr(items[0], "message_id", None)
++        except Exception as exc:
++            logger.debug("[Feishu] Failed to fetch last message in thread %s: %s", thread_id, exc)
++        return None
+diff --git a/tests/gateway/test_feishu_topic_follow.py b/tests/gateway/test_feishu_topic_follow.py
+new file mode 100644
+index 0000000000..6221b3d361
+--- /dev/null
++++ b/tests/gateway/test_feishu_topic_follow.py
+@@ -0,0 +1,317 @@
++"""Feishu topic follow: a group @mention is answered in a new topic, and inside a topic the bot
++owns, follow-ups need no @mention.
++
++Behaviour contracts:
++- ``thread_reply`` opens the topic before the turn runs, so the first turn's source already
++  carries the topic's ``thread_id`` (one session for the whole topic).
++- ``thread_follow`` admits an un-mentioned topic message only when this bot is the one the topic
++  belongs to: in ``last_active`` mode (the default, ``true``) the bot triggered last, in ``owner``
++  mode the bot that replied first. A message @mentioning someone else, a sender the group policy
++  rejects, and a bot sender stay rejected.
++"""
++
++from __future__ import annotations
++
++import asyncio
++import json
++from types import SimpleNamespace
++from unittest.mock import AsyncMock, Mock
++
++import pytest
++
++from gateway.config import PlatformConfig
++from tests.gateway.feishu_helpers import install_dedup_state, make_adapter_skeleton, make_sender
++
++APP_ID = "cli_me"
++PEER_APP_ID = "cli_peer"
++
++
++class _FakeMessageApi:
++    """Stands in for ``client.im.v1.message``: records reply/list requests."""
++
++    def __init__(self, *, thread_id="omt_new", reply_ok=True, topic_senders=(), topic_messages=None):
++        self.replies = []
++        self.lists = []
++        self._thread_id = thread_id
++        self._reply_ok = reply_ok
++        self._topic_senders = list(topic_senders)
++        self._topic_messages = topic_messages
++
++    def reply(self, request):
++        self.replies.append(request)
++        data = SimpleNamespace(thread_id=self._thread_id, message_id="om_ack")
++        return SimpleNamespace(success=lambda: self._reply_ok, data=data, code=0 if self._reply_ok else 230001,
++                               msg="ok" if self._reply_ok else "denied")
++
++    def list(self, request):
++        self.lists.append(request)
++        if self._topic_messages is not None:
++            items = list(self._topic_messages)
++            if request.sort_type == "ByCreateTimeDesc":
++                items.reverse()
++            return SimpleNamespace(success=lambda: True, data=SimpleNamespace(items=items))
++        items = [SimpleNamespace(message_id=f"om_{i}", sender=SimpleNamespace(sender_type=kind, id=sid))
++                 for i, (kind, sid) in enumerate(self._topic_senders)]
++        return SimpleNamespace(success=lambda: True, data=SimpleNamespace(items=items))
++
++
++def _wire_client(adapter, api):
++    adapter._client = SimpleNamespace(im=SimpleNamespace(v1=SimpleNamespace(message=api)))
++
++    async def _run_blocking(func, *args):
++        return func(*args)
++
++    adapter._run_blocking = _run_blocking
++
++
++# --- Opening a topic for a group reply ----------------------------------------------------------
++
++
++def _inbound_adapter(extra, api):
++    from plugins.platforms.feishu.adapter import FeishuAdapter
++
++    adapter = FeishuAdapter.__new__(FeishuAdapter)
++    adapter.config = PlatformConfig(extra=extra)
++    adapter._app_id = APP_ID
++    adapter._bot_open_id, adapter._bot_user_id, adapter._bot_name = "ou_me", "", "Hermes"
++    adapter._init_topic_follow_state()
++    adapter._download_feishu_message_resources = AsyncMock(return_value=([], []))
++    adapter._fetch_message_text = AsyncMock(return_value=None)
++    adapter.get_chat_info = AsyncMock(return_value={"name": "Team"})
++    adapter._resolve_sender_profile = AsyncMock(return_value={"user_id": "u1", "user_name": "Neo", "user_id_alt": None})
++    adapter._resolve_source_chat_type = Mock(return_value="group")
++    adapter.build_source = Mock(side_effect=lambda **kw: SimpleNamespace(**kw))
++    adapter._dispatch_inbound_event = AsyncMock()
++    _wire_client(adapter, api)
++    return adapter
++
++
++def _run_inbound(adapter, *, chat_type="group", chat_id="oc_team", thread_id=None):
++    message = SimpleNamespace(
++        content=json.dumps({"text": "look at this"}), message_type="text", message_id="om_user",
++        mentions=[], chat_id=chat_id, parent_id=None, upper_message_id=None, root_id=None, thread_id=thread_id,
++    )
++    asyncio.run(adapter._process_inbound_message(
++        data=message, message=message, sender_id=None, chat_type=chat_type, message_id="om_user",
++    ))
++    return adapter.build_source.call_args.kwargs["thread_id"]
++
++
++def test_thread_reply_opens_a_topic_before_the_turn_and_routes_the_turn_into_it():
++    api = _FakeMessageApi(thread_id="omt_new")
++    adapter = _inbound_adapter({"thread_reply": True}, api)
++
++    assert _run_inbound(adapter) == "omt_new"
++    (request,) = api.replies
++    assert request.message_id == "om_user"
++    assert request.request_body.reply_in_thread is True
++    assert json.loads(request.request_body.content)["text"]
++    # The topic this bot opened is its own without asking Feishu.
++    assert asyncio.run(adapter._topic_owned_by_self("omt_new")) is True
++    assert api.lists == []
++
++
++@pytest.mark.parametrize("extra", [
++    {},
++    {"thread_reply": False},
++    {"thread_reply": True, "group_rules": {"oc_team": {"policy": "open", "thread_reply": False}}},
++])
++def test_no_topic_when_thread_reply_is_off_for_the_chat(extra):
++    api = _FakeMessageApi()
++    adapter = _inbound_adapter(extra, api)
++
++    assert _run_inbound(adapter) is None
++    assert api.replies == []
++
++
++def test_group_rule_turns_thread_reply_on_for_one_chat():
++    api = _FakeMessageApi(thread_id="omt_rule")
++    adapter = _inbound_adapter({"group_rules": {"oc_team": {"policy": "open", "thread_reply": "true"}}}, api)
++
++    assert _run_inbound(adapter, chat_id="oc_team") == "omt_rule"
++    assert _run_inbound(adapter, chat_id="oc_other") is None
++
++
++@pytest.mark.parametrize("kwargs", [{"chat_type": "p2p"}, {"thread_id": "omt_existing"}])
++def test_dm_and_existing_topic_messages_never_open_a_topic(kwargs):
++    api = _FakeMessageApi()
++    adapter = _inbound_adapter({"thread_reply": True}, api)
++
++    assert _run_inbound(adapter, **kwargs) == kwargs.get("thread_id")
++    assert api.replies == []
++
++
++def test_refused_topic_falls_back_to_an_ordinary_group_reply():
++    api = _FakeMessageApi(reply_ok=False)
++    adapter = _inbound_adapter({"thread_reply": True}, api)
++
++    assert _run_inbound(adapter) is None
++    adapter._dispatch_inbound_event.assert_awaited_once()
++
++
++# --- Following up inside an owned topic without @mention ----------------------------------------
++
++
++def _follow_adapter(api, *, extra=None, group_policy="open"):
++    adapter = make_adapter_skeleton(group_policy=group_policy)
++    adapter._app_id = APP_ID
++    adapter.config = PlatformConfig(extra={"thread_follow": True} if extra is None else extra)
++    adapter._init_topic_follow_state()
++    install_dedup_state(adapter)
++    _wire_client(adapter, api)
++    adapter._process_inbound_message = AsyncMock()
++    return adapter
++
++
++_n = iter(range(10_000))
++
++
++def _deliver(adapter, *, thread_id: str | None = "omt_1", mentions=None, sender=None):
++    message = SimpleNamespace(
++        message_id=f"om_in_{next(_n)}", chat_type="group", chat_id="oc_team", thread_id=thread_id,
++        mentions=mentions, content="", message_type="text",
++    )
++    adapter._process_inbound_message.reset_mock()
++    asyncio.run(adapter._handle_message_event_data(
++        SimpleNamespace(event=SimpleNamespace(sender=sender or make_sender(open_id="ou_neo"), message=message))
++    ))
++    return adapter._process_inbound_message.await_count == 1
++
++
++_OWNER = {"thread_follow": "owner"}
++
++
++def test_owner_mode_admits_unmentioned_message_in_own_topic_and_caches_ownership():
++    api = _FakeMessageApi(topic_senders=[("user", "ou_neo"), ("app", APP_ID)])
++    adapter = _follow_adapter(api, extra=_OWNER)
++
++    assert _deliver(adapter) is True
++    assert _deliver(adapter) is True
++    assert len(api.lists) == 1
++
++
++def test_owner_mode_topic_stays_with_its_first_bot_after_this_bot_was_mentioned_once():
++    # Y answered first; X was @mentioned later and replied once. The topic is still Y's.
++    api = _FakeMessageApi(topic_senders=[("user", "ou_neo"), ("app", PEER_APP_ID), ("app", APP_ID)])
++    adapter = _follow_adapter(api, extra=_OWNER)
++
++    assert _deliver(adapter) is False
++
++
++def test_message_mentioning_someone_else_is_left_to_them():
++    api = _FakeMessageApi(topic_senders=[("app", APP_ID)])
++    adapter = _follow_adapter(api)
++    colleague = SimpleNamespace(key="@_user_1", id=SimpleNamespace(open_id="ou_colleague", user_id=None), name="Ann")
++
++    assert _deliver(adapter, mentions=[colleague]) is False
++    assert api.lists == []
++
++
++def test_owner_mode_topic_no_bot_has_answered_yet_is_not_followed_and_is_asked_again():
++    api = _FakeMessageApi(topic_senders=[("user", "ou_neo")])
++    adapter = _follow_adapter(api, extra=_OWNER)
++
++    assert _deliver(adapter) is False
++    assert _deliver(adapter) is False
++    assert len(api.lists) == 2
++
++
++@pytest.mark.parametrize("extra", [
++    {},
++    {"thread_follow": True, "group_rules": {"oc_team": {"policy": "open", "thread_follow": False}}},
++    {"thread_follow": "nonsense"},
++])
++def test_follow_off_for_the_chat_keeps_the_mention_requirement(extra):
++    api = _FakeMessageApi(topic_senders=[("app", APP_ID)])
++    adapter = _follow_adapter(api, extra=extra)
++
++    assert _deliver(adapter) is False
++
++
++def test_group_policy_still_gates_follow_ups():
++    api = _FakeMessageApi(topic_senders=[("app", APP_ID)])
++    adapter = _follow_adapter(api, group_policy="allowlist")  # empty allowlist: nobody may trigger
++
++    assert _deliver(adapter) is False
++    assert api.lists == []
++
++
++def test_bot_senders_and_plain_group_messages_are_not_followed():
++    api = _FakeMessageApi(topic_senders=[("app", APP_ID)])
++    adapter = _follow_adapter(api)
++    adapter._allow_bots = "all"
++    adapter._bot_open_id = "ou_me"
++
++    assert _deliver(adapter, sender=make_sender(sender_type="bot", open_id="ou_peer")) is False
++    assert _deliver(adapter, thread_id=None) is False
++
++
++# --- last_active mode: the bot triggered last answers -------------------------------------------
++
++
++def _msg(sender_type, sender_id, *mentioned, message_id=None):
++    mentions = [SimpleNamespace(key=f"@_user_{i}", id=oid, id_type="open_id", name=oid)
++                for i, oid in enumerate(mentioned, 1)] or None
++    return SimpleNamespace(message_id=message_id or f"om_h_{next(_n)}", mentions=mentions,
++                           sender=SimpleNamespace(sender_type=sender_type, id=sender_id))
++
++
++def _last_active_adapter(*history, extra=None):
++    """History oldest first; this bot is APP_ID / ou_me, the peer bot is PEER_APP_ID / ou_peer."""
++    api = _FakeMessageApi(topic_messages=list(history))
++    adapter = _follow_adapter(api, extra=extra)
++    adapter._bot_open_id, adapter._bot_user_id, adapter._bot_name = "ou_me", "", "Hermes"
++    return adapter, api
++
++
++@pytest.mark.parametrize("extra", [None, {"thread_follow": "last_active"}, {"thread_follow": "LAST_ACTIVE"}])
++def test_last_active_follows_the_bot_that_replied_last(extra):
++    me, _ = _last_active_adapter(_msg("user", "ou_neo", "ou_me"), _msg("app", APP_ID), _msg("user", "ou_neo"),
++                                 extra=extra)
++    assert _deliver(me) is True
++
++
++def test_last_active_moves_to_a_bot_mentioned_mid_topic_after_it_replied():
++    # This bot opened the topic; the peer was @mentioned and replied, so the topic is now the peer's.
++    me, api = _last_active_adapter(
++        _msg("user", "ou_neo", "ou_me"), _msg("app", APP_ID), _msg("user", "ou_neo", "ou_peer"), _msg("app", PEER_APP_ID),
++    )
++    assert _deliver(me) is False
++    # Re-read every time: nothing is cached in this mode.
++    assert _deliver(me) is False
++    assert len(api.lists) == 2
++
++
++def test_last_active_mentioned_bot_takes_over_before_it_has_replied():
++    # Peer opened the topic; the user @mentions this bot and follows up before the reply lands.
++    me, _ = _last_active_adapter(_msg("user", "ou_neo", "ou_peer"), _msg("app", PEER_APP_ID),
++                                 _msg("user", "ou_neo", "ou_me"))
++    assert _deliver(me) is True
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("user", "ou_neo", "ou_peer"))
++    assert _deliver(me) is False
++
++
++def test_last_active_bot_mentioning_another_bot_hands_the_topic_over():
++    # Peer's message @mentions this bot: the topic is this bot's.
++    me, _ = _last_active_adapter(_msg("app", PEER_APP_ID), _msg("app", PEER_APP_ID, "ou_me"))
++    assert _deliver(me) is True
++    # This bot's own message @mentions the peer: no longer this bot's.
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("app", APP_ID, "ou_peer"))
++    assert _deliver(me) is False
++
++
++def test_last_active_skips_plain_chatter_the_current_message_and_mention_all():
++    current = _msg("user", "ou_neo", message_id="om_current")
++    everyone = _msg("user", "ou_neo")
++    everyone.mentions = [SimpleNamespace(key="@_all", id="all", id_type="", name="所有人")]
++    me, _ = _last_active_adapter(_msg("app", APP_ID), _msg("user", "ou_ann"), everyone, current)
++    message = SimpleNamespace(thread_id="omt_1", message_id="om_current")
++    assert asyncio.run(me._topic_last_triggered_self(message.thread_id, message.message_id)) is True
++
++
++def test_last_active_topic_without_any_trigger_or_unreadable_is_not_followed():
++    me, _ = _last_active_adapter(_msg("user", "ou_neo"))
++    assert _deliver(me) is False
++    me, api = _last_active_adapter(_msg("app", APP_ID))
++    api.list = lambda request: SimpleNamespace(success=lambda: False, code=99991672, msg="no scope")
++    assert _deliver(me) is False
+diff --git a/website/docs/user-guide/messaging/feishu.md b/website/docs/user-guide/messaging/feishu.md
+index 3e1996633e..33c7c60b7c 100644
+--- a/website/docs/user-guide/messaging/feishu.md
++++ b/website/docs/user-guide/messaging/feishu.md
+@@ -252,6 +252,24 @@ FEISHU_REQUIRE_MENTION=false
+ 
+ For per-chat control, set `require_mention` on a `group_rules` entry — see [Per-Group Access Control](#per-group-access-control) below.
+ 
++### Topic replies and follow-ups without @mention
++
++Two opt-in switches in `config.yaml` turn a group @mention into a topic (话题) conversation:
++
++```yaml
++platforms:
++  feishu:
++    extra:
++      thread_reply: true    # answer a top-level group @mention in a new topic
++      thread_follow: true   # inside a topic this bot owns, follow-ups need no @mention
++```
++
++- With `thread_reply`, Hermes first posts a short acknowledgement in a new topic on the triggering message, then runs the turn inside that topic, so the whole topic is one session.
++- With `thread_follow`, a topic belongs to the bot that replied in it first. Its follow-ups are answered without an @mention; a message that @mentions someone else (a colleague or another bot) is left to them. A bot @mentioned once in another bot's topic answers that message only. Ownership is read from the topic itself, so it survives gateway restarts.
++- The group policy still applies to every follow-up.
++- Both keys can be set per chat on a `group_rules` entry, which overrides the global value.
++- `thread_follow` needs the `im:message.group_msg` scope (read all group messages) on the Feishu app; without it Feishu only delivers @mentions.
++
+ ### Bot Identity
+ 
+ Hermes auto-detects the bot's `open_id` and display name on startup. You only need to set these manually when auto-detection cannot reach the Feishu API, or when your app uses tenant-scoped user IDs:
+@@ -530,6 +548,8 @@ platforms:
+         "oc_free_chat":
+           policy: "open"
+           require_mention: false       # overrides FEISHU_REQUIRE_MENTION for this chat
++          thread_reply: true           # overrides platforms.feishu.extra.thread_reply
++          thread_follow: true          # overrides platforms.feishu.extra.thread_follow
+ ```
+ 
+ | Policy | Description |
